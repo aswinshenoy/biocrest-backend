@@ -1,0 +1,29 @@
+version: 0.2
+phases:
+  pre_build:
+    commands:
+    - echo Logging in to Amazon ECR....
+    - aws --version
+    - $(aws ecr get-login --no-include-email --region ap-south-1 | sed 's|https://||')
+    - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
+    - REPOSITORY_URI=282472006225.dkr.ecr.ap-south-1.amazonaws.com/biocrest-backend
+    - docker pull $REPOSITORY_URI:latest || true
+  build:
+    commands:
+    - echo Build started on `date`
+    - echo Building the Docker image...
+    - docker build --cache-from $REPOSITORY_URI:latest -t $REPOSITORY_URI:latest .
+    - docker tag $REPOSITORY_URI:latest $REPOSITORY_URI:latest
+  post_build:
+    commands:
+    - echo Build completed on `date`
+    - echo pushing to repo
+    - docker push $REPOSITORY_URI:latest
+    - echo Writing image definitions file...
+    - printf '{"ImageURI":"%s"}' $REPOSITORY_URI:latest > imageDetail.json
+cache:
+  paths:
+    - /root/.cache/pip
+artifacts:
+  files:
+    - imageDetail.json
