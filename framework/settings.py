@@ -88,7 +88,7 @@ STATIC_LOCATION = 'static'
 STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{STATIC_LOCATION}/'
 STATICFILES_STORAGE = 'framework.utils.StaticStorage'
 
-STATICFILES_DIRS = (os.path.join('../static'),)    # List of static file directories
+STATICFILES_DIRS = (os.path.join('static'),)     # List of static file directories
 FILE_UPLOAD_MAX_MEMORY_SIZE = 1024 * 1024 * 8  # Maximum allowed upload size  for any file
 
 
@@ -153,3 +153,9 @@ ALERTBOX_SENDER_ID = env.str('ALERTBOX_SENDER_ID', default='')
 EMAIL_BACKEND = 'django_ses.SESBackend'
 AWS_SES_REGION_NAME = 'ap-south-1'
 AWS_SES_REGION_ENDPOINT = 'email.ap-south-1.amazonaws.com'
+
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp-mail.outlook.com'
+# EMAIL_HOST_USER = env.str('OUTLOOK_EMAIL', default='')
+# EMAIL_HOST_PASSWORD = env.str('OUTLOOK_PASSWORD', default='')
+# EMAIL_PORT = 587

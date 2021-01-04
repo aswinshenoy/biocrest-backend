@@ -2,7 +2,7 @@ import graphene
 from graphene_django.debug import DjangoDebug
 
 from chowkidar.graphql import AuthMutations
-from user.graphql import UserMutations
+from user.graphql import UserMutations, UserQueries
 
 
 class Mutation(
@@ -13,6 +13,7 @@ class Mutation(
 
 
 class Query(
+    UserQueries,
     graphene.ObjectType
 ):
     debug = graphene.Field(DjangoDebug, name='_debug')

@@ -14,6 +14,7 @@ class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
     password = graphene.String()
     type = graphene.Int()
     idCard = Upload()
+    phone = graphene.String()
 
 
 __all__ = [

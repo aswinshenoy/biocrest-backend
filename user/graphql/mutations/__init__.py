@@ -1,8 +1,9 @@
 import graphene
 from .account import *
+from .verification import *
 
 
-class UserMutations(AccountMutations, graphene.ObjectType):
+class UserMutations(AccountMutations, VerificationMutations, graphene.ObjectType):
     pass
 
 

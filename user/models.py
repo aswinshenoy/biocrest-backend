@@ -24,6 +24,8 @@ class User(AbstractUser):
     isPhoneVerified = models.BooleanField(default=False)
     type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, blank=True, null=True)
     isIDVerified = models.BooleanField(default=False)
+    requiresCorrection = models.BooleanField(default=False)
+    remarks = models.CharField(max_length=255, default='', blank=True)
 
 
 class UserIDCard(models.Model):

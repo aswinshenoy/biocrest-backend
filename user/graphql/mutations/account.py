@@ -49,6 +49,7 @@ class RegisterUser(
             UserVerificationOTP.objects.create(
                 code=code, user=user, isPhoneOTP=False
             )
+            print(code)
             send_email_confirmation_email(user=user, code=code)
             return AccountMutationResponse(success=True, returning=user)
 
@@ -86,6 +87,7 @@ class UpdateProfile(
                 user=user,
                 image=update.idCard
             )
+        user.requiresCorrection = False
         user.save()
         return AccountMutationResponse(success=True, returning=user)
 
@@ -125,6 +127,7 @@ class ResendOTP(
             UserVerificationOTP.objects.create(
                 code=code, user=user, isPhoneOTP=True
             )
+        print(code)
         send_otp_to_number(code, number=phone)
         return True
 
@@ -187,6 +190,7 @@ class ResendConfirmationEmail(
             UserVerificationOTP.objects.create(
                 code=code, user=user, isPhoneOTP=False
             )
+        print(code)
         send_email_confirmation_email(user=user, code=code)
         return True
 

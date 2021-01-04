@@ -8,13 +8,16 @@ class UserProfile(graphene.ObjectType):
     email = graphene.String()
     phone = graphene.String()
     type = graphene.String()
+    remarks = graphene.String()
+    dateJoined = graphene.String()
     isPhoneVerified = graphene.Boolean()
     isEmailVerified = graphene.Boolean()
     isIDVerified = graphene.Boolean()
-
-
-class PersonalProfile(UserProfile, graphene.ObjectType):
+    requiresCorrection = graphene.Boolean()
     isProfileComplete = graphene.Boolean()
+
+    def resolve_dateJoined(self, info):
+        return self.date_joined
 
     def resolve_isProfileComplete(self, info):
         if (
@@ -27,7 +30,22 @@ class PersonalProfile(UserProfile, graphene.ObjectType):
         return False
 
 
+class PersonalProfile(UserProfile, graphene.ObjectType):
+    pass
+
+
+class IDVerification(graphene.ObjectType):
+    user = graphene.Field(UserProfile)
+    image = graphene.String()
+    timestamp = graphene.String()
+
+    def resolve_image(self, info):
+        if self and self.image and hasattr(self.image, 'url') and self.image.url:
+            return self.image.url
+
+
 __all__ = [
     'UserProfile',
-    'PersonalProfile'
+    'PersonalProfile',
+    'IDVerification'
 ]
