@@ -83,10 +83,14 @@ class UpdateProfile(
         if hasattr(update, "password") and update.password is not None:
             user.set_password(update.password)
         if hasattr(update, "idCard") and update.idCard is not None:
-            UserIDCard.objects.create(
-                user=user,
-                image=update.idCard
-            )
+            try:
+                card = UserIDCard.objects.filter(user=user)
+                card.image = update.idCard
+            except UserIDCard.DoesNotExist:
+                UserIDCard.objects.create(
+                    user=user,
+                    image=update.idCard
+                )
         user.requiresCorrection = False
         user.save()
         return AccountMutationResponse(success=True, returning=user)
