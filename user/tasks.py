@@ -36,7 +36,7 @@ def send_email_confirmation_email(user, code) -> None:
     send_mail(
         subject='Biocrest: Verify Your Email',
         message=strip_tags(html_content),
-        from_email='verify@amritauniversity.info',
+        from_email='noreply@vidyut.amrita.edu',
         recipient_list=[user.email],
         html_message=html_content,
         fail_silently=False,
