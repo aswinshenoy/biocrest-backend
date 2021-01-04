@@ -84,8 +84,9 @@ class UpdateProfile(
             user.set_password(update.password)
         if hasattr(update, "idCard") and update.idCard is not None:
             try:
-                card = UserIDCard.objects.filter(user=user)
+                card = UserIDCard.objects.get(user=user)
                 card.image = update.idCard
+                card.save()
             except UserIDCard.DoesNotExist:
                 UserIDCard.objects.create(
                     user=user,

@@ -1,5 +1,7 @@
 import graphene
 
+from user.models import UserIDCard
+
 
 class UserProfile(graphene.ObjectType):
     id = graphene.ID()
@@ -24,9 +26,11 @@ class UserProfile(graphene.ObjectType):
             self.isEmailVerified and
             self.isPhoneVerified and
             self.phone is not None and
-            self.type is not None
+            self.type is not None and
+            not self.requiresCorrection
         ):
-            return True
+            if UserIDCard.objects.filter(user=self).exists():
+                return True
         return False
 
 
