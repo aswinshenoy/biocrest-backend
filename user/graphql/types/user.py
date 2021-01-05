@@ -1,4 +1,5 @@
 import graphene
+from django.utils import timezone
 
 from user.models import UserIDCard
 
@@ -19,7 +20,8 @@ class UserProfile(graphene.ObjectType):
     isProfileComplete = graphene.Boolean()
 
     def resolve_dateJoined(self, info):
-        return self.date_joined
+        to_tz = timezone.get_default_timezone()
+        return self.date_joined.astimezone(to_tz).isoformat()
 
     def resolve_isProfileComplete(self, info):
         if (

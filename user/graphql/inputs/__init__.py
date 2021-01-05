@@ -17,7 +17,14 @@ class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
     phone = graphene.String()
 
 
+class ProfileQueryFilters(graphene.InputObjectType):
+    type = graphene.String()
+    startDate = graphene.Date()
+    endDate = graphene.Date()
+
+
 __all__ = [
     'UserCreationInput',
-    'UserUpdationInput'
+    'UserUpdationInput',
+    'ProfileQueryFilters'
 ]

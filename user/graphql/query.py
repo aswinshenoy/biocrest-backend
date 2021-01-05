@@ -2,6 +2,7 @@ import graphene
 from chowkidar.graphql.decorators import login_required, resolve_user
 from django.db.models import Q
 
+from user.graphql.inputs import ProfileQueryFilters
 from user.graphql.types import PersonalProfile, IDVerification, UserProfile
 from user.models import User, UserIDCard
 
@@ -11,6 +12,7 @@ class UserQueries(graphene.ObjectType):
     profilesToVerify = graphene.List(IDVerification)
     profiles = graphene.List(
         UserProfile,
+        filters=graphene.Argument(ProfileQueryFilters, required=False),
         key=graphene.String(required=False)
     )
 
@@ -25,16 +27,22 @@ class UserQueries(graphene.ObjectType):
         return None
 
     @resolve_user
-    def resolve_profiles(self, info, key=None):
+    def resolve_profiles(self, info, filters: ProfileQueryFilters = None, key=None):
         qs = User.objects.exclude(type=0)
         if info.context.user.type == 0:
-            if key is not None:
-                return qs.filter(
+            if filters is not None:
+                if filters.type is not None:
+                    qs = qs.filter(type=filters.type)
+                if filters.startDate is not None:
+                    qs = qs.filter(date_joined__gte=filters.startDate)
+                if filters.endDate is not None:
+                    qs = qs.filter(date_joined__lte=filters.endDate)
+            if key is not None and len(key) > 0:
+                qs = qs.filter(
                     Q(username__istartswith=key) |
                     Q(name__istartswith=key) |
                     Q(phone__contains=key) |
                     Q(email__exact=key)
-                )[:10]
-            else:
-                return qs.order_by('-id')
+                )
+            return qs.order_by('-id')
         return None
