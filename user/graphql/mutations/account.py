@@ -50,7 +50,7 @@ class RegisterUser(
                 code=code, user=user, isPhoneOTP=False
             )
             print(code)
-            send_email_confirmation_email(user=user, code=code)
+            #send_email_confirmation_email(user=user, code=code)
             return AccountMutationResponse(success=True, returning=user)
 
 
@@ -80,6 +80,12 @@ class UpdateProfile(
             if user.email != update.email:
                 user.isEmailVerified = False
             user.email = update.email
+        if hasattr(update, "city") and update.city is not None:
+            user.city = update.city
+        if hasattr(update, "state") and update.state is not None:
+            user.state = update.state
+        if hasattr(update, "country") and update.country is not None:
+            user.country = update.country
         if hasattr(update, "password") and update.password is not None:
             user.set_password(update.password)
         if hasattr(update, "idCard") and update.idCard is not None:
@@ -107,7 +113,7 @@ class ResendOTP(
     Output = graphene.Boolean
 
     @resolve_user
-    def mutate(self, info, phone: str=None):
+    def mutate(self, info, phone: str = None):
         user = info.context.user
         if phone is not None:
             if (not len(phone) == 13) or (not phone.startswith('+91')):
@@ -129,11 +135,9 @@ class ResendOTP(
             entry.timestamp = timezone.now()
             entry.save()
         except UserVerificationOTP.DoesNotExist:
-            UserVerificationOTP.objects.create(
-                code=code, user=user, isPhoneOTP=True
-            )
+            UserVerificationOTP.objects.create(code=code, user=user, isPhoneOTP=True)
+        # send_otp_to_number(code, number=phone)
         print(code)
-        send_otp_to_number(code, number=phone)
         return True
 
 
@@ -196,7 +200,7 @@ class ResendConfirmationEmail(
                 code=code, user=user, isPhoneOTP=False
             )
         print(code)
-        send_email_confirmation_email(user=user, code=code)
+        #send_email_confirmation_email(user=user, code=code)
         return True
 
 

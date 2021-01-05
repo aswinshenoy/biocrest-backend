@@ -10,8 +10,7 @@ class User(AbstractUser):
         (0, 'Admin'),
         (1, 'Student'),
         (2, 'Academician'),
-        (3, 'Industry'),
-        (4, 'International')
+        (3, 'Industry')
     )
 
     id = models.BigAutoField(primary_key=True, null=False)
@@ -19,6 +18,9 @@ class User(AbstractUser):
     last_name = None
     name = models.CharField(max_length=255, default='', blank=True)
     email = models.EmailField(unique=True, null=False, blank=False)
+    city = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    country = models.CharField(max_length=50, default='India', blank=True)
     isEmailVerified = models.BooleanField(default=False)
     phone = models.CharField(max_length=15, blank=True, null=True)
     isPhoneVerified = models.BooleanField(default=False)

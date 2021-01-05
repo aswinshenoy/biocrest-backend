@@ -15,6 +15,9 @@ class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
     type = graphene.Int()
     idCard = Upload()
     phone = graphene.String()
+    city = graphene.String()
+    state = graphene.String()
+    country = graphene.String()
 
 
 class ProfileQueryFilters(graphene.InputObjectType):
