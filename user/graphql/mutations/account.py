@@ -49,8 +49,7 @@ class RegisterUser(
             UserVerificationOTP.objects.create(
                 code=code, user=user, isPhoneOTP=False
             )
-            print(code)
-            #send_email_confirmation_email(user=user, code=code)
+            send_email_confirmation_email(user=user, code=code)
             return AccountMutationResponse(success=True, returning=user)
 
 
@@ -80,6 +79,8 @@ class UpdateProfile(
             if user.email != update.email:
                 user.isEmailVerified = False
             user.email = update.email
+        if hasattr(update, "gender") and update.gender is not None:
+            user.gender = update.gender
         if hasattr(update, "city") and update.city is not None:
             user.city = update.city
         if hasattr(update, "state") and update.state is not None:
@@ -136,8 +137,7 @@ class ResendOTP(
             entry.save()
         except UserVerificationOTP.DoesNotExist:
             UserVerificationOTP.objects.create(code=code, user=user, isPhoneOTP=True)
-        # send_otp_to_number(code, number=phone)
-        print(code)
+        send_otp_to_number(code, number=phone)
         return True
 
 
@@ -199,8 +199,7 @@ class ResendConfirmationEmail(
             UserVerificationOTP.objects.create(
                 code=code, user=user, isPhoneOTP=False
             )
-        print(code)
-        #send_email_confirmation_email(user=user, code=code)
+        send_email_confirmation_email(user=user, code=code)
         return True
 
 

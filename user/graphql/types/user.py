@@ -13,6 +13,7 @@ class UserProfile(graphene.ObjectType):
     city = graphene.String()
     state = graphene.String()
     country = graphene.String()
+    gender = graphene.String()
     type = graphene.String()
     remarks = graphene.String()
     dateJoined = graphene.String()

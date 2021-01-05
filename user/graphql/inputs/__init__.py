@@ -18,6 +18,7 @@ class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
     city = graphene.String()
     state = graphene.String()
     country = graphene.String()
+    gender = graphene.String()
 
 
 class ProfileQueryFilters(graphene.InputObjectType):

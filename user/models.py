@@ -21,6 +21,7 @@ class User(AbstractUser):
     city = models.CharField(max_length=50, null=True, blank=True)
     state = models.CharField(max_length=50, null=True, blank=True)
     country = models.CharField(max_length=50, default='India', blank=True)
+    gender = models.CharField(max_length=10, null=True, blank=True)
     isEmailVerified = models.BooleanField(default=False)
     phone = models.CharField(max_length=15, blank=True, null=True)
     isPhoneVerified = models.BooleanField(default=False)
