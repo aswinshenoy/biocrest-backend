@@ -4,9 +4,15 @@ from django.utils import timezone
 from user.models import UserIDCard
 
 
+class AffiliationDataType(graphene.ObjectType):
+    id = graphene.ID()
+    name = graphene.String()
+
+
 class UserProfile(graphene.ObjectType):
     id = graphene.ID()
     username = graphene.String()
+    title = graphene.String()
     name = graphene.String()
     email = graphene.String()
     phone = graphene.String()
@@ -15,6 +21,8 @@ class UserProfile(graphene.ObjectType):
     country = graphene.String()
     gender = graphene.String()
     type = graphene.String()
+    affiliationBody = graphene.Field(AffiliationDataType)
+    affiliationTitle = graphene.Field(AffiliationDataType)
     remarks = graphene.String()
     dateJoined = graphene.String()
     isPhoneVerified = graphene.Boolean()
@@ -55,6 +63,7 @@ class IDVerification(graphene.ObjectType):
 
 
 __all__ = [
+    'AffiliationDataType',
     'UserProfile',
     'PersonalProfile',
     'IDVerification'

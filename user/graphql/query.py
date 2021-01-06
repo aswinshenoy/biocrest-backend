@@ -3,8 +3,8 @@ from chowkidar.graphql.decorators import login_required, resolve_user
 from django.db.models import Q
 
 from user.graphql.inputs import ProfileQueryFilters
-from user.graphql.types import PersonalProfile, IDVerification, UserProfile
-from user.models import User, UserIDCard
+from user.graphql.types import PersonalProfile, IDVerification, UserProfile, AffiliationDataType
+from user.models import AffiliationTitle, AffiliationBody, User, UserIDCard
 
 
 class UserQueries(graphene.ObjectType):
@@ -15,6 +15,24 @@ class UserQueries(graphene.ObjectType):
         filters=graphene.Argument(ProfileQueryFilters, required=False),
         key=graphene.String(required=False)
     )
+    affiliationTitles = graphene.List(
+        AffiliationDataType,
+        keyword=graphene.String(required=False)
+    )
+    affiliationBodies = graphene.List(
+        AffiliationDataType,
+        keyword=graphene.String(required=False)
+    )
+
+    def resolve_affiliationTitles(self, info, keyword=None):
+        if keyword:
+            return AffiliationTitle.objects.filter(name__istartswith=keyword)
+        return AffiliationTitle.objects.all()
+
+    def resolve_affiliationBodies(self, info, keyword=None):
+        if keyword:
+            return AffiliationBody.objects.filter(name__istartswith=keyword)
+        return AffiliationBody.objects.all()
 
     @login_required
     def resolve_me(self, info):

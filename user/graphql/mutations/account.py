@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from user.graphql.inputs import UserCreationInput, UserUpdationInput
 from user.graphql.types import PersonalProfile
-from user.models import User, UserIDCard, UserVerificationOTP
+from user.models import AffiliationBody, AffiliationTitle, User, UserIDCard, UserVerificationOTP
 from user.tasks import send_otp_to_number, send_email_confirmation_email
 from user.utils import generate_username_from_email, generate_otp
 
@@ -46,9 +46,7 @@ class RegisterUser(
             user.set_password(input.password)
             user.save()
             code = generate_otp()
-            UserVerificationOTP.objects.create(
-                code=code, user=user, isPhoneOTP=False
-            )
+            UserVerificationOTP.objects.create(code=code, user=user, isPhoneOTP=False)
             send_email_confirmation_email(user=user, code=code)
             return AccountMutationResponse(success=True, returning=user)
 
@@ -69,6 +67,8 @@ class UpdateProfile(
     @resolve_user
     def mutate(self, info, update: UserUpdationInput) -> AccountMutationResponse:
         user = info.context.user
+        if hasattr(update, "title") and update.title is not None:
+            user.title = update.title
         if hasattr(update, "name") and update.name is not None:
             user.name = update.name
         if hasattr(update, "type") and update.type is not None:
@@ -89,6 +89,16 @@ class UpdateProfile(
             user.country = update.country
         if hasattr(update, "password") and update.password is not None:
             user.set_password(update.password)
+        if hasattr(update, "affiliationTitleID") and update.affiliationTitleID is not None:
+            try:
+                user.affiliationTitle = AffiliationTitle.objects.get(id=update.affiliationTitleID)
+            except AffiliationTitle.DoesNotExist:
+                pass
+        if hasattr(update, "affiliationBodyID") and update.affiliationBodyID is not None:
+            try:
+                user.affiliationBody = AffiliationBody.objects.get(id=update.affiliationBodyID)
+            except AffiliationBody.DoesNotExist:
+                pass
         if hasattr(update, "idCard") and update.idCard is not None:
             try:
                 card = UserIDCard.objects.get(user=user)
