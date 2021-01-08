@@ -7,7 +7,7 @@ from django.utils import timezone
 
 from user.graphql.inputs import UserCreationInput, UserUpdationInput
 from user.graphql.types import PersonalProfile
-from user.models import AffiliationBody, AffiliationTitle, User, UserIDCard, UserVerificationOTP
+from user.models import AffiliationBody, AffiliationTitle, User, UserVerificationOTP
 from user.tasks import send_otp_to_number, send_email_confirmation_email
 from user.utils import generate_username_from_email, generate_otp
 
@@ -100,16 +100,7 @@ class UpdateProfile(
             except AffiliationBody.DoesNotExist:
                 pass
         if hasattr(update, "idCard") and update.idCard is not None:
-            try:
-                card = UserIDCard.objects.get(user=user)
-                card.image = update.idCard
-                card.save()
-            except UserIDCard.DoesNotExist:
-                UserIDCard.objects.create(
-                    user=user,
-                    image=update.idCard
-                )
-        user.requiresCorrection = False
+            user.IDCard = update.idCard
         user.save()
         return AccountMutationResponse(success=True, returning=user)
 
@@ -141,7 +132,10 @@ class ResendOTP(
         try:
             entry = UserVerificationOTP.objects.get(user=user, isPhoneOTP=True)
             if entry.timestamp + timedelta(minutes=1) > timezone.now():
-                raise APIException('Try after 1 minute', code='TRY_LATER')
+                raise APIException(
+                    'Try after ' + str((entry.timestamp + timedelta(minutes=1) - timezone.now()).seconds) + ' seconds',
+                    code='TRY_LATER'
+                )
             entry.code = code
             entry.timestamp = timezone.now()
             entry.save()

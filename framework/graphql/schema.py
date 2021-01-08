@@ -2,11 +2,14 @@ import graphene
 from graphene_django.debug import DjangoDebug
 
 from chowkidar.graphql import AuthMutations
+from event.graphql import EventMutations
+from event.graphql.queries import EventQueries
 from user.graphql import UserMutations, UserQueries
 
 
 class Mutation(
     AuthMutations,
+    EventMutations,
     UserMutations
 ):
     pass
@@ -14,6 +17,7 @@ class Mutation(
 
 class Query(
     UserQueries,
+    EventQueries,
     graphene.ObjectType
 ):
     debug = graphene.Field(DjangoDebug, name='_debug')

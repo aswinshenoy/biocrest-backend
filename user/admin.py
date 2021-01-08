@@ -17,11 +17,6 @@ class UserAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(UserIDCard)
-class UserIDCardAdmin(admin.ModelAdmin):
-    pass
-
-
 @admin.register(UserVerificationOTP)
 class UserVerificationOTPAdmin(admin.ModelAdmin):
     pass

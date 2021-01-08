@@ -7,6 +7,7 @@ from user.media import UserIDStorage
 
 class AffiliationTitle(models.Model):
     name = models.CharField(max_length=200)
+    isJobTitle = models.BooleanField(default=False)
 
     class Meta:
         db_table = 'affiliation_title'
@@ -19,6 +20,7 @@ class AffiliationTitle(models.Model):
 
 class AffiliationBody(models.Model):
     name = models.CharField(max_length=200)
+    isEducational = models.BooleanField(default=True)
 
     class Meta:
         db_table = 'affiliation_body'
@@ -50,22 +52,7 @@ class User(AbstractUser):
     isPhoneVerified = models.BooleanField(default=False)
     type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, blank=True, null=True)
 
-    city = models.CharField(max_length=50, null=True, blank=True)
-    state = models.CharField(max_length=50, null=True, blank=True)
-    country = models.CharField(max_length=50, null=True, blank=True)
-
-    affiliationTitle = models.ForeignKey(AffiliationTitle, on_delete=models.PROTECT, null=True, blank=True)
-    affiliationBody = models.ForeignKey(AffiliationBody, on_delete=models.PROTECT, null=True, blank=True)
-
-    isIDVerified = models.BooleanField(default=False)
-    requiresCorrection = models.BooleanField(default=False)
-    remarks = models.CharField(max_length=255, default='', blank=True)
-
-
-class UserIDCard(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    isIDVerified = models.BooleanField(default=False)
-    image = MediaField(
+    IDCard = MediaField(
         storage=UserIDStorage(),
         max_size=1024 * 1024 * 8,
         content_types=[
@@ -73,15 +60,14 @@ class UserIDCard(models.Model):
         ],
         null=True, blank=True
     )
-    timestamp = models.DateTimeField(auto_now=True)
+    isIDVerified = models.BooleanField(default=False)
 
-    class Meta:
-        db_table = 'user_id_card'
-        verbose_name_plural = "User ID Cards"
-        verbose_name = "User ID Card"
+    city = models.CharField(max_length=50, null=True, blank=True)
+    state = models.CharField(max_length=50, null=True, blank=True)
+    country = models.CharField(max_length=50, null=True, blank=True)
 
-    def __str__(self):
-        return str(self.user.username)
+    affiliationTitle = models.ForeignKey(AffiliationTitle, on_delete=models.PROTECT, null=True, blank=True)
+    affiliationBody = models.ForeignKey(AffiliationBody, on_delete=models.PROTECT, null=True, blank=True)
 
 
 class UserVerificationOTP(models.Model):
@@ -103,6 +89,5 @@ __all__ = [
     'AffiliationTitle',
     'AffiliationBody',
     'User',
-    'UserIDCard',
     'UserVerificationOTP',
 ]

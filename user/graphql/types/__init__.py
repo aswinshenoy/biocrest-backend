@@ -4,5 +4,4 @@ __all__ = [
     'AffiliationDataType',
     'UserProfile',
     'PersonalProfile',
-    'IDVerification'
 ]
