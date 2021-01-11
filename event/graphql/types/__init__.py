@@ -65,7 +65,7 @@ class Participant(graphene.ObjectType):
                         "value": value
                     })
                 return data
-            except ValueError as e:
+            except Exception:
                 pass
         return []
 

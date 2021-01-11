@@ -4,6 +4,7 @@ from chowkidar.graphql.exceptions import APIException
 from django.utils import timezone
 
 from event.models import Participant
+from event.tasks import send_email_requesting_correction, send_email_confirming_registration
 from user.graphql.inputs import UserUpdationInput
 
 
@@ -52,10 +53,12 @@ class ReviewParticipant(graphene.Mutation):
                     reg.approver_id = info.context.userID
                     reg.timestampApproved = timezone.now()
                     reg.save()
+                    send_email_confirming_registration(user=user)
                     return True
                 else:
                     reg.remarks = remarks
                     reg.save()
+                    send_email_requesting_correction(user=user, remarks=remarks)
                     return True
             else:
                 raise APIException('You are not allowed to review registrations', code='FORBIDDEN')
