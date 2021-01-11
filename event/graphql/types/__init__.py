@@ -13,6 +13,7 @@ class EventFormData(graphene.ObjectType):
 class SelectOption(graphene.ObjectType):
     value = graphene.String()
     label = graphene.String()
+    allowedUserTypes = graphene.List(graphene.Int)
 
 
 class EventFieldData(graphene.ObjectType):

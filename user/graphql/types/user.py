@@ -1,6 +1,7 @@
 import graphene
 from django.utils import timezone
 
+
 class AffiliationDataType(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.String()
@@ -17,7 +18,7 @@ class UserProfile(graphene.ObjectType):
     state = graphene.String()
     country = graphene.String()
     gender = graphene.String()
-    type = graphene.String()
+    type = graphene.Int()
     affiliationBody = graphene.Field(AffiliationDataType)
     affiliationTitle = graphene.Field(AffiliationDataType)
     dateJoined = graphene.String()
