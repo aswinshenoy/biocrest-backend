@@ -21,6 +21,7 @@ class EventFieldData(graphene.ObjectType):
     label = graphene.String()
     key = graphene.String()
     options = graphene.List(SelectOption)
+    maxSelections = graphene.Int()
 
 
 class Event(graphene.ObjectType):
