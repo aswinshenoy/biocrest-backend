@@ -8,7 +8,7 @@ from django.utils import timezone
 from user.graphql.inputs import UserCreationInput, UserUpdationInput
 from user.graphql.types import PersonalProfile
 from user.models import AffiliationBody, AffiliationTitle, User, UserVerificationOTP
-from user.tasks import send_otp_to_number, send_email_confirmation_email
+from user.tasks import send_otp_to_number, send_email_confirmation_email, send_password_reset_email
 from user.utils import generate_username_from_email, generate_otp
 
 
@@ -171,7 +171,7 @@ class VerifyOTP(
 
 
 class ResendConfirmationEmail(
-    graphene. Mutation,
+    graphene.Mutation,
     description='Request email change of the logged-in user, a confirmation email is send to the new email'
 ):
     class Arguments:
@@ -232,6 +232,62 @@ class VerifyEmail(
             return False
 
 
+class RequestPasswordReset(
+    graphene.Mutation,
+    description='Request password reset through email'
+):
+    class Arguments:
+        email = graphene.String()
+
+    Output = graphene.Boolean
+
+    def mutate(self, info, email=None):
+        try:
+            user = User.objects.get(email=email)
+            try:
+                entry = UserVerificationOTP.objects.get(user=user, isPhoneOTP=False)
+                entry.delete()
+            except UserVerificationOTP.DoesNotExist:
+                pass
+            code = generate_otp()
+            UserVerificationOTP.objects.create(code=code, user=user, isPhoneOTP=False)
+            send_password_reset_email(user=user, code=code)
+            return True
+        except User.DoesNotExist:
+            raise APIException('This email is not associated with any accounts', code='INVALID_EMAIL')
+
+
+class ResetPassword(
+    graphene.Mutation,
+    description='Reset password of a user through a confirmation otp sent to his/her email.'
+):
+    class Arguments:
+        newPassword = graphene.String(required=True)
+        email = graphene.String(required=True)
+        otp = graphene.String(
+            required=True,
+            description='A one time pin code required to verify an email.'
+        )
+
+    Output = graphene.Boolean
+
+    def mutate(self, info, newPassword, email, otp):
+        try:
+            entry = UserVerificationOTP.objects.get(
+                user__email=email,
+                code=otp,
+                isPhoneOTP=False
+            )
+            user = entry.user
+            user.set_password(newPassword)
+            user.isEmailVerified = True
+            user.save()
+            entry.delete()
+            return True
+        except UserVerificationOTP.DoesNotExist:
+            return False
+
+
 class AccountMutations(graphene.ObjectType):
     register = RegisterUser.Field()
     updateProfile = UpdateProfile.Field()
@@ -239,6 +295,8 @@ class AccountMutations(graphene.ObjectType):
     verifyOTP = VerifyOTP.Field()
     resendConfirmationEmail = ResendConfirmationEmail.Field()
     verifyEmail = VerifyEmail.Field()
+    requestPasswordReset = RequestPasswordReset.Field()
+    resetPassword = ResetPassword.Field()
 
 
 __all__ = [

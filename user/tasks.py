@@ -43,7 +43,26 @@ def send_email_confirmation_email(user, code) -> None:
     )
 
 
+@task()
+def send_password_reset_email(user, code) -> None:
+    data = {
+        "name": user.username,
+        "code": code,
+    }
+    htmly = get_template('./emails/reset-password.html')
+    html_content = htmly.render(data)
+    send_mail(
+        subject='Biocrest: Reset Your Password',
+        message=strip_tags(html_content),
+        from_email='biocrest@amritauniversity.info',
+        recipient_list=[user.email],
+        html_message=html_content,
+        fail_silently=False,
+    )
+
+
 __all__ = [
     'send_otp_to_number',
-    'send_email_confirmation_email'
+    'send_email_confirmation_email',
+    'send_password_reset_email',
 ]
