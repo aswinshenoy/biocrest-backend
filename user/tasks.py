@@ -34,7 +34,7 @@ def send_email_confirmation_email(user, code) -> None:
     htmly = get_template('./emails/email-verification.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Biocrest: Verify Your Email',
+        subject='Amrita Biocrest: Verify Your Email',
         message=strip_tags(html_content),
         from_email='biocrest@amritauniversity.info',
         recipient_list=[user.email],
@@ -52,7 +52,7 @@ def send_password_reset_email(user, code) -> None:
     htmly = get_template('./emails/reset-password.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Biocrest: Reset Your Password',
+        subject='Amrita Biocrest: Reset Your Password',
         message=strip_tags(html_content),
         from_email='biocrest@amritauniversity.info',
         recipient_list=[user.email],

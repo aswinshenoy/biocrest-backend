@@ -12,7 +12,7 @@ def send_email_confirming_registration(user) -> None:
     htmly = get_template('./emails/reg-approval.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Biocrest: Registration Approved',
+        subject='Amrita Biocrest: Registration Approved',
         message=strip_tags(html_content),
         from_email='biocrest@amritauniversity.info',
         recipient_list=[user.email],
@@ -29,7 +29,7 @@ def send_email_requesting_correction(user, remarks) -> None:
     htmly = get_template('./emails/verify-remarks.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Biocrest: Corrections Requested',
+        subject='Amrita Biocrest: Corrections Requested',
         message=strip_tags(html_content),
         from_email='biocrest@amritauniversity.info',
         recipient_list=[user.email],
