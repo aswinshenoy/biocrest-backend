@@ -79,5 +79,6 @@ class Participant(graphene.ObjectType):
 
 __all__ = [
     'EventFormData',
+    'Event',
     'Participant'
 ]

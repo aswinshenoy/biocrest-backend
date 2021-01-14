@@ -42,7 +42,7 @@ class ParticipantQueries(graphene.ObjectType):
     def resolve_participants(
         self, info,
         eventID,
-        count: int = 15,
+        count: int = 25,
         after: str = None,
         search: str = None,
         filters: ParticipantQueryFilters = None
@@ -57,9 +57,11 @@ class ParticipantQueries(graphene.ObjectType):
                 if filters.endDate is not None:
                     qs = qs.filter(timestampRegistered__lte=filters.endDate)
                 if filters.verificationRequired:
-                    qs = qs.filter(
-                        approver__isnull=True,
-                        user__IDCard__isnull=False
+                    print('check id is null')
+                    qs = qs.exclude(
+                        Q(approver__isnull=False) |
+                        Q(user__IDCard='') |
+                        Q(user__IDCard__exact=None)
                     )
             if search is not None:
                 qs = qs.filter(
