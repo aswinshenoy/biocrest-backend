@@ -29,7 +29,7 @@ class ReviewParticipant(graphene.Mutation):
     ) -> bool:
         try:
             reg = Participant.objects.get(id=participantID)
-            if reg.event.eventmanager_set.filter(user_id=info.context.user, canReviewRegistrations=True).exists():
+            if reg.event.eventmanager_set.filter(user_id=info.context.userID, canReviewRegistrations=True).exists():
                 user = reg.user
                 if approve:
                     if profileUpdate:
