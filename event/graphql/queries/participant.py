@@ -47,8 +47,8 @@ class ParticipantQueries(graphene.ObjectType):
         search: str = None,
         filters: ParticipantQueryFilters = None
     ):
-        qs = Participant.objects.filter(event_id=eventID)
         if EventManager.objects.filter(user_id=info.context.userID, event_id=eventID, canReviewRegistrations=True).exists():
+            qs = Participant.objects.filter(event_id=eventID)
             if filters is not None:
                 if filters.type is not None:
                     qs = qs.filter(user__type=filters.type)
@@ -57,12 +57,20 @@ class ParticipantQueries(graphene.ObjectType):
                 if filters.endDate is not None:
                     qs = qs.filter(timestampRegistered__lte=filters.endDate)
                 if filters.verificationRequired:
-                    print('check id is null')
                     qs = qs.exclude(
                         Q(approver__isnull=False) |
                         Q(user__IDCard='') |
                         Q(user__IDCard__exact=None)
                     )
+                if filters.status:
+                    if filters.status == 'APPROVED':
+                        qs = qs.filter(timestampApproved__isnull=False, approver__isnull=False)
+                    elif filters.status == 'NO_ID':
+                        qs = qs.filter(user__IDCard='')
+                    elif filters.status == 'EMAIL_UNVERIFIED':
+                        qs = qs.filter(user__isEmailVerified=False)
+                    elif filters.status == 'PHONE_UNVERIFIED':
+                        qs = qs.filter(user__isPhoneVerified=False)
             if search is not None:
                 qs = qs.filter(
                     Q(user__username__istartswith=search) |

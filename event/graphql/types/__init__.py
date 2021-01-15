@@ -74,7 +74,7 @@ class Participant(graphene.ObjectType):
         return self.event
 
     def resolve_isApproved(self, info):
-        return self.approver is not None
+        return self.approver_id is not None
 
 
 __all__ = [

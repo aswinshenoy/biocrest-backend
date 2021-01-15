@@ -26,7 +26,7 @@ class Participant(models.Model):
     timestampRegistered = models.DateTimeField(auto_now=True)
     approver = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='approver', null=True, blank=True)
     timestampApproved = models.DateTimeField(null=True, blank=True)
-    remarks = models.CharField(max_length=255)
+    remarks = models.CharField(max_length=255, default='', blank=True)
 
     class Meta:
         unique_together = [
@@ -37,7 +37,7 @@ class Participant(models.Model):
         verbose_name = "Event Participant"
 
     def __str__(self):
-        return str(self.uuid)
+        return str(self.user.username)
 
 
 class EventManager(models.Model):
