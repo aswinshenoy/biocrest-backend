@@ -39,11 +39,14 @@ class UserProfile(graphene.ObjectType):
     def resolve_isProfileComplete(self, info):
         if (
             self.isEmailVerified and
-            self.isPhoneVerified and
+            (
+                (self.isPhoneVerified and self.phone)
+                or
+                self.country != 'India'
+            ) and
             self.country is not None and
-            self.phone is not None and
-            self.type is not None and
-            self.IDCard is not None
+            self.type is not None
+            # self.IDCard is not None
         ):
             return True
         return False

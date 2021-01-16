@@ -58,9 +58,9 @@ class ParticipantQueries(graphene.ObjectType):
                     qs = qs.filter(timestampRegistered__lte=filters.endDate)
                 if filters.verificationRequired:
                     qs = qs.exclude(
-                        Q(approver__isnull=False) |
-                        Q(user__IDCard='') |
-                        Q(user__IDCard__exact=None)
+                        Q(approver__isnull=False)
+                        # Q(user__IDCard='') |
+                        # Q(user__IDCard__exact=None)
                     )
                 if filters.status:
                     if filters.status == 'APPROVED':
