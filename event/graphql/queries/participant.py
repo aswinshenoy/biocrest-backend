@@ -22,7 +22,7 @@ class ParticipantQueries(graphene.ObjectType):
     participants = graphene.Field(
         ParticipantsQuery,
         eventID=graphene.ID(),
-        count=graphene.Int(description='Number of challenges to be retrieved'),
+        count=graphene.Int(description='Number of participants to be retrieved'),
         after=graphene.String(),
         search=graphene.String(),
         filters=graphene.Argument(ParticipantQueryFilters)
@@ -58,7 +58,15 @@ class ParticipantQueries(graphene.ObjectType):
                     qs = qs.filter(timestampRegistered__lte=filters.endDate)
                 if filters.verificationRequired:
                     qs = qs.exclude(
-                        Q(approver__isnull=False)
+                        Q(approver__isnull=False) |
+                        Q(user__affiliationTitle__isnull=True) |
+                        Q(user__affiliationBody__isnull=True) |
+                        Q(user__country__isnull=True) |
+                        Q(type__isnull=True) |
+                        Q(
+                            Q(user__phone__isnull=True) &
+                            Q(user__country__exact='India')
+                        )
                         # Q(user__IDCard='') |
                         # Q(user__IDCard__exact=None)
                     )
