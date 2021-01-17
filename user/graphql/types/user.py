@@ -44,6 +44,10 @@ class UserProfile(graphene.ObjectType):
                 or
                 self.country != 'India'
             ) and
+            self.name is not None and
+            self.name != '' and
+            self.affiliationBody is not None and
+            self.affiliationTitle is not None and
             self.country is not None and
             self.type is not None
             # self.IDCard is not None
