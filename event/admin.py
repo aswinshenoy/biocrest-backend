@@ -12,6 +12,11 @@ class ParticipantAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Submission)
+class SubmissionAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(EventManager)
 class EventManagerAdmin(admin.ModelAdmin):
     pass

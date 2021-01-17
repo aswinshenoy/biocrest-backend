@@ -26,7 +26,21 @@ class EventFieldData(graphene.ObjectType):
 
 class Event(graphene.ObjectType):
     name = graphene.String()
+    slug = graphene.String()
+    shortDescription = graphene.String()
+    details = graphene.String()
+    coverURL = graphene.String()
+    isTeamEvent = graphene.Boolean()
+    minTeamSize = graphene.Boolean()
+    maxTeamSize = graphene.Boolean()
+    requireApproval = graphene.Boolean()
     formFields = graphene.List(EventFieldData)
+    postApprovalFields = graphene.List(EventFieldData)
+    parentEvent = graphene.Field('event.graphql.types.Event')
+
+    def resolve_coverURL(self, info):
+        if self and self.cover and hasattr(self.cover, 'url') and self.cover.url:
+            return self.cover.url
 
     def resolve_formData(self, info):
         if self.formFields:

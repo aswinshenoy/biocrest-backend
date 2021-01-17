@@ -70,6 +70,17 @@ class User(AbstractUser):
     affiliationBody = models.ForeignKey(AffiliationBody, on_delete=models.PROTECT, null=True, blank=True)
 
 
+class Team(models.Model):
+    name = models.CharField(max_length=100)
+    leader = models.ForeignKey(User, related_name='TeamLeader', on_delete=models.PROTECT)
+    members = models.ManyToManyField(User, blank=True, related_name='TeamMembers')
+    allowEditing = models.BooleanField(default=False)
+    inviteCode = models.CharField(max_length=8, unique=True)
+
+    def __str__(self):
+        return self.name
+
+
 class UserVerificationOTP(models.Model):
     code = models.CharField(max_length=8)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -89,5 +100,6 @@ __all__ = [
     'AffiliationTitle',
     'AffiliationBody',
     'User',
+    'Team',
     'UserVerificationOTP',
 ]
