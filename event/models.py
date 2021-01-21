@@ -74,7 +74,7 @@ class Participant(models.Model):
         verbose_name = "Event Participant"
 
     def __str__(self):
-        return str(self.user.username)
+        return str(self.id)
 
 
 class Submission(models.Model):
@@ -87,9 +87,6 @@ class Submission(models.Model):
     file = MediaField(
         storage=SubmissionStorage(),
         max_size=1024 * 1024 * 12,
-        content_types=[
-            'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp',
-        ],
         null=True, blank=True
     )
     url = models.URLField(null=True, blank=True)
@@ -97,6 +94,7 @@ class Submission(models.Model):
     timestamp = models.DateTimeField(auto_now=True)
     isPublic = models.BooleanField()
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    key = models.CharField(max_length=100, default='', blank=True)
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
 
     class Meta:
@@ -123,7 +121,7 @@ class EventManager(models.Model):
         verbose_name = "Event Manager"
 
     def __str__(self):
-        return self.user.username + ' ' + self.event.title
+        return self.user.username + ' ' + self.event.name
 
 
 __all__ = [

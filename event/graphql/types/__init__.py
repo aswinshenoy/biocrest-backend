@@ -22,9 +22,14 @@ class EventFieldData(graphene.ObjectType):
     key = graphene.String()
     options = graphene.List(SelectOption)
     maxSelections = graphene.Int()
+    charLimit = graphene.Int()
+    isPublic = graphene.Boolean()
+    isURL = graphene.Boolean()
+    formats = graphene.String()
 
 
 class Event(graphene.ObjectType):
+    id = graphene.ID()
     name = graphene.String()
     slug = graphene.String()
     shortDescription = graphene.String()
@@ -51,6 +56,17 @@ class Event(graphene.ObjectType):
         return []
 
 
+class EventSubmission(graphene.ObjectType):
+    id = graphene.ID()
+    url = graphene.String()
+    fileURL = graphene.String()
+    key = graphene.String()
+
+    def resolve_fileURL(self, info):
+        if self and self.file and hasattr(self.file, 'url') and self.file.url:
+            return self.file.url
+
+
 class Participant(graphene.ObjectType):
     uuid = graphene.String()
     id = graphene.String()
@@ -61,6 +77,7 @@ class Participant(graphene.ObjectType):
     event = graphene.Field(Event)
     isApproved = graphene.Boolean()
     remarks = graphene.String()
+    submissions = graphene.List(EventSubmission)
 
     def resolve_profile(self, info):
         return self.user
@@ -89,6 +106,9 @@ class Participant(graphene.ObjectType):
 
     def resolve_isApproved(self, info):
         return self.approver_id is not None
+
+    def resolve_submissions(self, info):
+        return self.submission_set.all()
 
 
 __all__ = [

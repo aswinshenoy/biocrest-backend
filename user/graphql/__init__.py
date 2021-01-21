@@ -1,5 +1,5 @@
 from .mutations import UserMutations
-from .query import UserQueries
+from .queries import UserQueries
 
 __all__ = [
     'UserQueries',

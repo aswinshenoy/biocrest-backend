@@ -1,9 +1,10 @@
 import graphene
 from .account import *
 from .affiliation import *
+from .team import TeamMutations
 
 
-class UserMutations(AccountMutations, AffiliationMutations, graphene.ObjectType):
+class UserMutations(AccountMutations, AffiliationMutations, TeamMutations, graphene.ObjectType):
     pass
 
 

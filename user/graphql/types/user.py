@@ -27,6 +27,7 @@ class UserProfile(graphene.ObjectType):
     IDCardURL = graphene.String()
     isIDVerified = graphene.Boolean()
     isProfileComplete = graphene.Boolean()
+    registrations = graphene.List('event.graphql.types.Participant')
 
     def resolve_dateJoined(self, info):
         to_tz = timezone.get_default_timezone()
@@ -54,6 +55,9 @@ class UserProfile(graphene.ObjectType):
         ):
             return True
         return False
+
+    def resolve_registrations(self, info):
+        return self.participant_set.all()
 
 
 class PersonalProfile(UserProfile, graphene.ObjectType):

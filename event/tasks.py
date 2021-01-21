@@ -5,9 +5,10 @@ from huey.contrib.djhuey import task
 
 
 @task()
-def send_email_confirming_registration(user) -> None:
+def send_email_confirming_registration(user, participant) -> None:
     data = {
-        "name": user.title + ' ' + user.name
+        "name": user.title + ' ' + user.name,
+        "eventName": participant.event.name
     }
     htmly = get_template('./emails/reg-approval.html')
     html_content = htmly.render(data)
@@ -22,9 +23,10 @@ def send_email_confirming_registration(user) -> None:
 
 
 @task()
-def send_email_requesting_correction(user, remarks) -> None:
+def send_email_requesting_correction(user, participant) -> None:
     data = {
-        "remarks": remarks
+        "remarks": participant.remarks,
+        "eventName": participant.event.name
     }
     htmly = get_template('./emails/verify-remarks.html')
     html_content = htmly.render(data)

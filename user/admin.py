@@ -17,6 +17,11 @@ class UserAdmin(admin.ModelAdmin):
     pass
 
 
+@admin.register(Team)
+class TeamAdmin(admin.ModelAdmin):
+    pass
+
+
 @admin.register(UserVerificationOTP)
 class UserVerificationOTPAdmin(admin.ModelAdmin):
     pass

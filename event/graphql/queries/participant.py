@@ -17,7 +17,11 @@ class ParticipantsQuery(BaseQuery, graphene.ObjectType):
 class ParticipantQueries(graphene.ObjectType):
     myEventProfile = graphene.Field(
         PType,
-        eventID=graphene.ID()
+        eventID=graphene.ID(required=True)
+    )
+    myEvents = graphene.List(
+        PType,
+        parentID=graphene.ID()
     )
     participants = graphene.Field(
         ParticipantsQuery,
@@ -34,6 +38,16 @@ class ParticipantQueries(graphene.ObjectType):
             return Participant.objects.get(
                 user_id=info.context.userID,
                 event_id=eventID
+            )
+        except Participant.DoesNotExist:
+            raise APIException('You are not a participant in this event', code='NOT_PARTICIPANT')
+
+    @login_required
+    def resolve_myEvents(self, info, parentID=None):
+        try:
+            return Participant.objects.filter(
+                Q(Q(user_id=info.context.userID) | Q(team__members=info.context.userID)) &
+                Q(event__parent_id=parentID)
             )
         except Participant.DoesNotExist:
             raise APIException('You are not a participant in this event', code='NOT_PARTICIPANT')

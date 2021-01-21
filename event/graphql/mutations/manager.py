@@ -53,12 +53,12 @@ class ReviewParticipant(graphene.Mutation):
                     reg.approver_id = info.context.userID
                     reg.timestampApproved = timezone.now()
                     reg.save()
-                    send_email_confirming_registration(user=user)
+                    send_email_confirming_registration(user=user, participant=reg)
                     return True
                 else:
                     reg.remarks = remarks
                     reg.save()
-                    send_email_requesting_correction(user=user, remarks=remarks)
+                    send_email_requesting_correction(user=user, participant=reg)
                     return True
             else:
                 raise APIException('You are not allowed to review registrations', code='FORBIDDEN')
