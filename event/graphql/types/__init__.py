@@ -55,11 +55,11 @@ class Event(graphene.ObjectType):
 
     def resolve_coverURL(self, info):
         if self and self.cover and hasattr(self.cover, 'url') and self.cover.url:
-            return self.cover.url
+            return self.cover.url.split('?')[0]
 
     def resolve_posterURL(self, info):
         if self and self.poster and hasattr(self.poster, 'url') and self.poster.url:
-            return self.poster.url
+            return self.poster.url.split('?')[0]
 
     def resolve_formData(self, info):
         if self.formFields:
@@ -73,7 +73,7 @@ class Event(graphene.ObjectType):
         if self.allowedUserTypes and info.context.userID:
             type = User.objects.get(id=info.context.userID).type
             for t in self.allowedUserTypes:
-                if t == type:
+                if t == str(type):
                     return True
             return False
 

@@ -4,7 +4,11 @@ from chowkidar.graphql.exceptions import APIException
 from django.utils import timezone
 
 from event.models import Participant
-from event.tasks import send_email_requesting_correction, send_email_confirming_registration
+from event.tasks import (
+    send_email_requesting_correction,
+    send_email_confirming_registration,
+    send_status_to_number
+)
 from user.graphql.inputs import UserUpdationInput
 
 
@@ -53,11 +57,17 @@ class ReviewParticipant(graphene.Mutation):
                     reg.approver_id = info.context.userID
                     reg.timestampApproved = timezone.now()
                     reg.save()
+                    if user:
+                        if user.phone and user.isPhoneVerified:
+                            send_status_to_number(number=user.phone, isApproved=True, name=reg.event.name)
                     send_email_confirming_registration(user=user, participant=reg)
                     return True
                 else:
                     reg.remarks = remarks
                     reg.save()
+                    if user:
+                        if user.phone and user.isPhoneVerified:
+                            send_status_to_number(number=user.phone, isApproved=False, name=reg.event.name)
                     editURL = 'https://events.amritauniversity.info/edit-profile'
                     if reg.event.parent is not None:
                         editURL = 'https://events.amritauniversity.info/register/' + reg.event.slug

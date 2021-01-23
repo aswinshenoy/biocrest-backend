@@ -12,7 +12,6 @@ class TeamQueries(graphene.ObjectType):
 
     @login_required
     def resolve_myTeams(self, info):
-        print(Team.objects.filter(members=info.context.userID), info.context.userID)
         return Team.objects.filter(members=info.context.userID)
 
 
