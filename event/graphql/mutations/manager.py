@@ -58,7 +58,10 @@ class ReviewParticipant(graphene.Mutation):
                 else:
                     reg.remarks = remarks
                     reg.save()
-                    send_email_requesting_correction(user=user, participant=reg)
+                    editURL = 'https://events.amritauniversity.info/edit-profile'
+                    if reg.event.parent is not None:
+                        editURL = 'https://events.amritauniversity.info/register/' + reg.event.slug
+                    send_email_requesting_correction(user=user, participant=reg, editURL=editURL)
                     return True
             else:
                 raise APIException('You are not allowed to review registrations', code='FORBIDDEN')

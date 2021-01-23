@@ -23,10 +23,11 @@ def send_email_confirming_registration(user, participant) -> None:
 
 
 @task()
-def send_email_requesting_correction(user, participant) -> None:
+def send_email_requesting_correction(user, participant, editURL=None) -> None:
     data = {
         "remarks": participant.remarks,
-        "eventName": participant.event.name
+        "eventName": participant.event.name,
+        "editURL": editURL if editURL else 'https://events.amritauniversity.info/edit-profile',
     }
     htmly = get_template('./emails/verify-remarks.html')
     html_content = htmly.render(data)
