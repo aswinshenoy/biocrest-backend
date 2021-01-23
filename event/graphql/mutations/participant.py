@@ -67,17 +67,23 @@ class Submit(graphene.Mutation):
     class Arguments:
         participantID = graphene.ID(required=True)
         key = graphene.String(required=True)
-        file = Upload(required=True)
+        file = Upload()
+        url = graphene.String()
         isPublic = graphene.Boolean(required=False)
 
     Output = SubmissionUploadMessage
 
     @login_required
-    def mutate(self, info, participantID: str, key: str, file, isPublic: bool = True) -> SubmissionUploadMessage:
+    def mutate(
+        self, info,
+        participantID: str,
+        key: str,
+        file=None,
+        url=None,
+        isPublic: bool = True
+    ) -> SubmissionUploadMessage:
         try:
-            participant = Participant.objects.get(
-                Q(id=participantID)
-            )
+            participant = Participant.objects.get(Q(id=participantID))
             if (
                 (participant.user is not None and participant.user.id == info.context.userID) or
                 (participant.team is not None and participant.team.members.filter(id=info.context.userID).exists())
@@ -85,6 +91,7 @@ class Submit(graphene.Mutation):
                 try:
                     submission = Submission.objects.get(participant=participant, event=participant.event, key=key)
                     submission.file = file
+                    submission.url = url
                     submission.save()
                 except Submission.DoesNotExist:
                     submission = Submission.objects.create(
@@ -92,11 +99,10 @@ class Submit(graphene.Mutation):
                         event=participant.event,
                         isPublic=isPublic,
                         key=key,
-                        file=file
+                        file=file,
+                        url=url
                     )
-                return SubmissionUploadMessage(
-                    id=submission.id
-                )
+                return SubmissionUploadMessage(id=submission.id)
             else:
                 raise APIException('Permission denied', code='FORBIDDEN')
         except Participant.DoesNotExist:
