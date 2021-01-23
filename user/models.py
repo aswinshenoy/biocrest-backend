@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
+from framework.utils import USER_TYPE_CHOICES
 from user.fields import MediaField
 from user.media import UserIDStorage
 
@@ -32,12 +33,7 @@ class AffiliationBody(models.Model):
 
 
 class User(AbstractUser):
-    USER_TYPE_CHOICES = (
-        (0, 'Admin'),
-        (1, 'Student'),
-        (2, 'Academician'),
-        (3, 'Industry')
-    )
+    USER_TYPE_CHOICES = []
 
     id = models.BigAutoField(primary_key=True, null=False)
     first_name = None

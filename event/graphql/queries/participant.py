@@ -36,9 +36,14 @@ class ParticipantQueries(graphene.ObjectType):
     def resolve_myEventProfile(self, info, eventID):
         try:
             return Participant.objects.get(
-                user_id=info.context.userID,
-                event_id=eventID
+                Q(Q(user_id=info.context.userID) | Q(team__members=info.context.userID)) &
+                Q(event_id=eventID)
             )
+        except Participant.MultipleObjectsReturned:
+            return Participant.objects.filter(
+                Q(Q(user_id=info.context.userID) | Q(team__members=info.context.userID)) &
+                Q(event_id=eventID)
+            ).first()
         except Participant.DoesNotExist:
             raise APIException('You are not a participant in this event', code='NOT_PARTICIPANT')
 

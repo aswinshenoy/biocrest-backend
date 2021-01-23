@@ -1,7 +1,9 @@
 import uuid as uuid
 from django.db import models
 from django.utils.text import slugify
+from multiselectfield import MultiSelectField
 
+from framework.utils import USER_TYPE_CHOICES, EVENT_TYPE_CHOICES
 from user.fields import MediaField
 from user.media import EventStorage, SubmissionStorage
 from user.models import User, Team
@@ -11,8 +13,17 @@ class Event(models.Model):
     name = models.CharField(max_length=255)
     slug = models.SlugField()
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+    type = models.PositiveSmallIntegerField(choices=EVENT_TYPE_CHOICES, default=0, blank=True)
 
     cover = MediaField(
+        storage=EventStorage(),
+        max_size=1024 * 1024 * 8,
+        content_types=[
+            'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp',
+        ],
+        null=True, blank=True
+    )
+    poster = MediaField(
         storage=EventStorage(),
         max_size=1024 * 1024 * 8,
         content_types=[
@@ -26,6 +37,10 @@ class Event(models.Model):
     isTeamEvent = models.BooleanField(default=False)
     minTeamSize = models.PositiveSmallIntegerField(null=True, blank=True)
     maxTeamSize = models.PositiveSmallIntegerField(null=True, blank=True)
+
+    acceptRegistrations = models.BooleanField(default=True)
+    registrationCloseTimestamp = models.DateTimeField(null=True, blank=True)
+    allowedUserTypes = MultiSelectField(choices=USER_TYPE_CHOICES, max_choices=10, max_length=255, null=True, blank=True)
 
     formFields = models.JSONField(null=True, blank=True)
     requireApproval = models.BooleanField(default=False)

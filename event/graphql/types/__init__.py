@@ -3,6 +3,7 @@ import json
 from django.utils import timezone
 
 from user.graphql.types import UserProfile
+from user.models import User
 
 
 class EventFormData(graphene.ObjectType):
@@ -35,17 +36,30 @@ class Event(graphene.ObjectType):
     shortDescription = graphene.String()
     details = graphene.String()
     coverURL = graphene.String()
+    posterURL = graphene.String()
     isTeamEvent = graphene.Boolean()
     minTeamSize = graphene.Boolean()
     maxTeamSize = graphene.Boolean()
     requireApproval = graphene.Boolean()
+    acceptRegistrations = graphene.Boolean()
+    isUserAllowedToRegister = graphene.Boolean()
+    registrationCloseTimestamp = graphene.String()
     formFields = graphene.List(EventFieldData)
     postApprovalFields = graphene.List(EventFieldData)
     parentEvent = graphene.Field('event.graphql.types.Event')
 
+    def resolve_registrationCloseTimestamp(self, info):
+        to_tz = timezone.get_default_timezone()
+        if self.registrationCloseTimestamp:
+            return self.registrationCloseTimestamp.astimezone(to_tz).isoformat()
+
     def resolve_coverURL(self, info):
         if self and self.cover and hasattr(self.cover, 'url') and self.cover.url:
             return self.cover.url
+
+    def resolve_posterURL(self, info):
+        if self and self.poster and hasattr(self.poster, 'url') and self.poster.url:
+            return self.poster.url
 
     def resolve_formData(self, info):
         if self.formFields:
@@ -54,6 +68,14 @@ class Event(graphene.ObjectType):
             except ValueError as e:
                 pass
         return []
+
+    def resolve_isUserAllowedToRegister(self, info):
+        if self.allowedUserTypes and info.context.userID:
+            type = User.objects.get(id=info.context.userID).type
+            for t in self.allowedUserTypes:
+                if t == type:
+                    return True
+            return False
 
 
 class EventSubmission(graphene.ObjectType):
