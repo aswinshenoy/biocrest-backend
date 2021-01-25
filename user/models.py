@@ -33,8 +33,6 @@ class AffiliationBody(models.Model):
 
 
 class User(AbstractUser):
-    USER_TYPE_CHOICES = []
-
     id = models.BigAutoField(primary_key=True, null=False)
     first_name = None
     last_name = None

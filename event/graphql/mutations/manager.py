@@ -35,8 +35,9 @@ class ReviewParticipant(graphene.Mutation):
             reg = Participant.objects.get(id=participantID)
             if reg.event.eventmanager_set.filter(user_id=info.context.userID, canReviewRegistrations=True).exists():
                 user = reg.user
+                team = reg.team
                 if approve:
-                    if profileUpdate:
+                    if profileUpdate and user:
                         if hasattr(profileUpdate, "name") and profileUpdate.name is not None:
                             user.name = profileUpdate.name
                         if hasattr(profileUpdate, "type") and profileUpdate.type is not None:
@@ -60,18 +61,28 @@ class ReviewParticipant(graphene.Mutation):
                     if user:
                         if user.phone and user.isPhoneVerified:
                             send_status_to_number(number=user.phone, isApproved=True, name=reg.event.name)
-                    send_email_confirming_registration(user=user, participant=reg)
+                        send_email_confirming_registration(user=user, participant=reg)
+                    elif team:
+                        if team.leader and team.leader.phone and team.leader.isPhoneVerified:
+                            send_status_to_number(number=team.leader.phone, isApproved=True, name=reg.event.name)
+                        for m in team.members.all():
+                            send_email_confirming_registration(user=m, participant=reg)
                     return True
                 else:
                     reg.remarks = remarks
                     reg.save()
-                    if user:
-                        if user.phone and user.isPhoneVerified:
-                            send_status_to_number(number=user.phone, isApproved=False, name=reg.event.name)
                     editURL = 'https://events.amritauniversity.info/edit-profile'
                     if reg.event.parent is not None:
                         editURL = 'https://events.amritauniversity.info/register/' + reg.event.slug
-                    send_email_requesting_correction(user=user, participant=reg, editURL=editURL)
+                    if user:
+                        if user.phone and user.isPhoneVerified:
+                            send_status_to_number(number=user.phone, isApproved=False, name=reg.event.name)
+                        send_email_requesting_correction(user=user, participant=reg, editURL=editURL)
+                    elif team:
+                        if team.leader and team.leader.phone and team.leader.isPhoneVerified:
+                            send_status_to_number(number=team.leader.phone, isApproved=False, name=reg.event.name)
+                        for m in team.members.all():
+                            send_email_confirming_registration(user=m, participant=reg)
                     return True
             else:
                 raise APIException('You are not allowed to review registrations', code='FORBIDDEN')

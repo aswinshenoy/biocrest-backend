@@ -2,7 +2,7 @@ import graphene
 import json
 from django.utils import timezone
 
-from user.graphql.types import UserProfile
+from user.graphql.types import UserProfile, TeamProfile
 from user.models import User
 
 
@@ -93,6 +93,7 @@ class Participant(graphene.ObjectType):
     uuid = graphene.String()
     id = graphene.String()
     profile = graphene.Field(UserProfile)
+    team = graphene.Field(TeamProfile)
     formData = graphene.List(EventFormData)
     timestampRegistered = graphene.String()
     remarks = graphene.String()
@@ -102,7 +103,12 @@ class Participant(graphene.ObjectType):
     submissions = graphene.List(EventSubmission)
 
     def resolve_profile(self, info):
-        return self.user
+        if self.user:
+            return self.user
+
+    def resolve_team(self, info):
+        if self.team:
+            return self.team
 
     def resolve_timestampRegistered(self, info):
         to_tz = timezone.get_default_timezone()

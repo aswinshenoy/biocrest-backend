@@ -14,7 +14,7 @@ class AffiliationBodyAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ['username', 'name', 'email', 'phone']
 
 
 @admin.register(Team)
