@@ -89,7 +89,7 @@ class Participant(models.Model):
         verbose_name = "Event Participant"
 
     def __str__(self):
-        return str(self.id)
+        return (self.user.username if self.user else self.team.name if self.team else '') + ' - ' + self.event.name
 
 
 class Submission(models.Model):
@@ -118,7 +118,7 @@ class Submission(models.Model):
         verbose_name = "Event Submission"
 
     def __str__(self):
-        return str(self.id)
+        return str(self.participant) + ' - ' + self.key
 
 
 class EventManager(models.Model):

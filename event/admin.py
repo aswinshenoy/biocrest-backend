@@ -4,12 +4,12 @@ from .models import *
 
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ['name', 'slug']
 
 
 @admin.register(Participant)
 class ParticipantAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ['user', 'event', 'team', 'approver']
 
 
 @admin.register(Submission)
@@ -19,5 +19,5 @@ class SubmissionAdmin(admin.ModelAdmin):
 
 @admin.register(EventManager)
 class EventManagerAdmin(admin.ModelAdmin):
-    pass
+    autocomplete_fields = ['user', 'event']
 

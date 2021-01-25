@@ -19,7 +19,8 @@ class UserAdmin(admin.ModelAdmin):
 
 @admin.register(Team)
 class TeamAdmin(admin.ModelAdmin):
-    pass
+    search_fields = ['name']
+    autocomplete_fields = ['leader', 'members']
 
 
 @admin.register(UserVerificationOTP)
