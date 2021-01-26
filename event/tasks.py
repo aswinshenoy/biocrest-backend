@@ -64,8 +64,35 @@ def send_email_requesting_correction(user, participant, editURL=None) -> None:
     )
 
 
+@task()
+def send_event_email(email, subject, htmlContent) -> None:
+    send_mail(
+        subject=subject,
+        message=strip_tags(htmlContent),
+        from_email='biocrest@amritauniversity.info',
+        recipient_list=[email],
+        html_message=htmlContent,
+        fail_silently=False,
+    )
+
+
+@task()
+def send_event_emails(emails, subject, url, imageURL) -> None:
+    sub = subject if subject else 'Amrita Biocrest Update'
+    data = {
+        "subject": sub,
+        "imageURL": imageURL.split('?')[0] if imageURL else None,
+        "url": url
+    }
+    htmly = get_template('./emails/event-image-email.html')
+    html_content = htmly.render(data)
+    for email in emails:
+        send_event_email(email=email, subject=sub, htmlContent=html_content)
+
+
 __all__ = [
     'send_status_to_number',
     'send_email_confirming_registration',
-    'send_email_requesting_correction'
+    'send_email_requesting_correction',
+    'send_event_emails'
 ]

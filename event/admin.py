@@ -21,3 +21,8 @@ class SubmissionAdmin(admin.ModelAdmin):
 class EventManagerAdmin(admin.ModelAdmin):
     autocomplete_fields = ['user', 'event']
 
+
+@admin.register(EventEmail)
+class EventEmailAdmin(admin.ModelAdmin):
+    pass
+

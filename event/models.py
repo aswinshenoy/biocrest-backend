@@ -1,9 +1,13 @@
 import uuid as uuid
 from django.db import models
+from django.db.models.functions import Length
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 from multiselectfield import MultiSelectField
 
-from framework.utils import USER_TYPE_CHOICES, EVENT_TYPE_CHOICES
+from event.tasks import send_event_emails
+from framework.utils import USER_TYPE_CHOICES, EVENT_TYPE_CHOICES, REG_STATUS_TYPE_CHOICES
 from user.fields import MediaField
 from user.media import EventStorage, SubmissionStorage
 from user.models import User, Team
@@ -139,9 +143,58 @@ class EventManager(models.Model):
         return self.user.username + ' ' + self.event.name
 
 
+class EventEmail(models.Model):
+    event = models.ForeignKey(Event, on_delete=models.CASCADE)
+    type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, null=True, blank=True)
+    status = models.PositiveSmallIntegerField(choices=REG_STATUS_TYPE_CHOICES, null=True, blank=True)
+    subject = models.CharField(max_length=255)
+    url = models.URLField(null=True, blank=True)
+    image = MediaField(
+        storage=EventStorage(),
+        max_size=1024 * 1024 * 8,
+        content_types=[
+            'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp',
+        ]
+    )
+
+    class Meta:
+        db_table = 'event_email'
+        verbose_name_plural = "Event Email"
+        verbose_name = "Event Email"
+
+    def __str__(self):
+        return self.event.name + ' - ' + self.subject
+
+
+@receiver(post_save, sender=EventEmail)
+def send_emails(sender, instance, created, **kwargs):
+    if created:
+        if instance.event.isTeamEvent:
+            pass
+        else:
+            qs = Participant.objects.filter(event=instance.event)
+            if instance.type:
+                qs = qs.filter(user__type=instance.type)
+            if instance.status:
+                if instance.status == 1:
+                    qs = qs.filter(approver__isnull=False)
+                if instance.status == 2:
+                    qs = qs.annotate(
+                        remarks_length=Length('remarks')
+                    ).filter(approver__isnull=True, remarks_length__gt=0)
+            emails = list(qs.values_list('user__email', flat=True))
+            send_event_emails(
+                subject=instance.subject,
+                emails=emails,
+                url=instance.url,
+                imageURL=instance.image.url if instance and instance.image else None
+            )
+
+
 __all__ = [
     'Event',
     'Participant',
     'Submission',
-    'EventManager'
+    'EventManager',
+    'EventEmail'
 ]

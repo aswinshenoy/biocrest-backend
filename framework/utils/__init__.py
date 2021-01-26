@@ -21,6 +21,13 @@ USER_TYPE_CHOICES = (
 )
 
 
+REG_STATUS_TYPE_CHOICES = (
+    (0, 'All'),
+    (1, 'Approved'),
+    (2, 'Changes Requested')
+)
+
+
 __all__ = [
     'USER_TYPE_CHOICES',
     'StaticStorage'

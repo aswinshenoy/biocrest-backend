@@ -1,9 +1,10 @@
 import graphene
 from chowkidar.graphql.decorators import login_required
 from chowkidar.graphql.exceptions import APIException
+from chowkidar.graphql.scalars import Upload
 from django.utils import timezone
 
-from event.models import Participant
+from event.models import Participant, Event, EventEmail
 from event.tasks import (
     send_email_requesting_correction,
     send_email_confirming_registration,
@@ -90,8 +91,44 @@ class ReviewParticipant(graphene.Mutation):
             raise APIException('Participant not found', code='REG_NOT_FOUND')
 
 
+class SendBulkEmails(graphene.Mutation):
+    class Arguments:
+        eventID = graphene.ID(required=True)
+        type = graphene.Int()
+        status = graphene.Int()
+        subject = graphene.String()
+        url = graphene.String()
+        image = Upload()
+
+    Output = graphene.Boolean
+
+    @login_required
+    def mutate(
+        self, info,
+        eventID: graphene.ID, subject, url, image,
+        type=None, status=0,
+    ) -> bool:
+        try:
+            event = Event.objects.get(id=eventID)
+            if event.eventmanager_set.filter(user_id=info.context.userID, canReviewRegistrations=True).exists():
+                EventEmail.objects.create(
+                    event=event,
+                    subject=subject,
+                    url=url,
+                    image=image,
+                    type=type,
+                    status=status,
+                )
+                return True
+            else:
+                raise APIException('You are not allowed to send bulk emails', code='FORBIDDEN')
+        except Event.DoesNotExist:
+            raise APIException('Invalid Event', code='INVALID_EVENT')
+
+
 class ManagerMutations(graphene.ObjectType):
     reviewParticipant = ReviewParticipant.Field()
+    sendBulkEmails = SendBulkEmails.Field()
 
 
 __all__ = [
