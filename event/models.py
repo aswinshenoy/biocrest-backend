@@ -130,6 +130,8 @@ class EventManager(models.Model):
     event = models.ForeignKey(Event, on_delete=models.PROTECT)
     canViewRegistrations = models.BooleanField(default=True)
     canReviewRegistrations = models.BooleanField(default=False)
+    canJudgeParticipants = models.BooleanField(default=False)
+    canSendEmails = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [

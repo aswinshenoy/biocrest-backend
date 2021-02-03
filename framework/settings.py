@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'chowkidar',
     'user',
     'event',
+    'judging',
     # 'payment',
 ]
 

@@ -101,6 +101,15 @@ class Participant(graphene.ObjectType):
     isApproved = graphene.Boolean()
     remarks = graphene.String()
     submissions = graphene.List(EventSubmission)
+    myPoints = graphene.Int()
+
+    def resolve_myPoints(self, info):
+        if info.context.userID:
+            from judging.models import ParticipantJudgement
+            try:
+                return ParticipantJudgement.objects.get(judge_id=info.context.userID, participant=self).points
+            except ParticipantJudgement.DoesNotExist:
+                pass
 
     def resolve_profile(self, info):
         if self.user:

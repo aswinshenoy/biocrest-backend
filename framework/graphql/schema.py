@@ -4,12 +4,14 @@ from graphene_django.debug import DjangoDebug
 from chowkidar.graphql import AuthMutations
 from event.graphql import EventMutations
 from event.graphql.queries import EventQueries
+from judging.graphql import JudgingMutations
 from user.graphql import UserMutations, UserQueries
 
 
 class Mutation(
     AuthMutations,
     EventMutations,
+    JudgingMutations,
     UserMutations
 ):
     pass
