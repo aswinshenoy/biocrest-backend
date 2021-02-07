@@ -4,7 +4,7 @@ from graphene_django.debug import DjangoDebug
 from chowkidar.graphql import AuthMutations
 from event.graphql import EventMutations
 from event.graphql.queries import EventQueries
-from judging.graphql import JudgingMutations
+from judging.graphql import JudgingMutations, JudgingQueries
 from user.graphql import UserMutations, UserQueries
 
 
@@ -20,6 +20,7 @@ class Mutation(
 class Query(
     UserQueries,
     EventQueries,
+    JudgingQueries,
     graphene.ObjectType
 ):
     debug = graphene.Field(DjangoDebug, name='_debug')

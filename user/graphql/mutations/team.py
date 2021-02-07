@@ -43,9 +43,28 @@ class JoinTeam(graphene.Mutation):
             raise APIException('Team does not exist', code='INVALID_INVITE_CODE')
 
 
+class LeaveTeam(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID(required=True)
+
+    Output = MyTeamProfile
+
+    @resolve_user
+    def mutate(self, info, id):
+        try:
+            t = Team.objects.get(id=id)
+            if t.members.filter(id=info.context.userID).exists():
+                t.members.remove(info.context.user)
+            t.save()
+            return t
+        except Team.DoesNotExist:
+            raise APIException('Team does not exist', code='INVALID_ID')
+
+
 class TeamMutations(graphene.ObjectType):
     createTeam = CreateTeam.Field()
     joinTeam = JoinTeam.Field()
+    leaveTeam = LeaveTeam.Field()
 
 
 __all__ = [

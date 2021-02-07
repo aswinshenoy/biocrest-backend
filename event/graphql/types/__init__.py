@@ -1,5 +1,7 @@
 import graphene
 import json
+
+from django.db.models import Avg
 from django.utils import timezone
 
 from user.graphql.types import UserProfile, TeamProfile
@@ -101,7 +103,13 @@ class Participant(graphene.ObjectType):
     isApproved = graphene.Boolean()
     remarks = graphene.String()
     submissions = graphene.List(EventSubmission)
+    avgPoints = graphene.Int()
     myPoints = graphene.Int()
+
+    def resolve_avgPoints(self, info):
+        if info.context.userID:
+            from judging.models import ParticipantJudgement
+            return ParticipantJudgement.objects.filter(participant=self).aggregate(Avg('points'))['points__avg']
 
     def resolve_myPoints(self, info):
         if info.context.userID:
