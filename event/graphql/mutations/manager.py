@@ -71,6 +71,8 @@ class ReviewParticipant(graphene.Mutation):
                     return True
                 else:
                     reg.remarks = remarks
+                    reg.approver = None
+                    reg.timestampApproved = None
                     reg.save()
                     editURL = 'https://events.amritauniversity.info/edit-profile'
                     if reg.event.parent is not None:
@@ -83,7 +85,7 @@ class ReviewParticipant(graphene.Mutation):
                         if team.leader and team.leader.phone and team.leader.isPhoneVerified:
                             send_status_to_number(number=team.leader.phone, isApproved=False, name=reg.event.name)
                         for m in team.members.all():
-                            send_email_confirming_registration(user=m, participant=reg)
+                            send_email_requesting_correction(user=m, participant=reg, editURL=editURL)
                     return True
             else:
                 raise APIException('You are not allowed to review registrations', code='FORBIDDEN')
