@@ -83,19 +83,24 @@ class ParticipantQueries(graphene.ObjectType):
                 qs = qs.filter(timestampRegistered__lte=filters.endDate)
             if filters.verificationRequired:
                 qs = qs.exclude(
-                    Q(user__isnull=False) &
                     Q(
-                        Q(approver__isnull=False) |
-                        Q(user__affiliationTitle__isnull=True) |
-                        Q(user__affiliationBody__isnull=True) |
-                        Q(user__country__isnull=True) |
-                        Q(user__type__isnull=True) |
+                        Q(user__isnull=False) &
                         Q(
-                            Q(user__phone__isnull=True) &
-                            Q(user__country__exact='India')
+                            Q(approver__isnull=False) |
+                            Q(user__affiliationTitle__isnull=True) |
+                            Q(user__affiliationBody__isnull=True) |
+                            Q(user__country__isnull=True) |
+                            Q(user__type__isnull=True) |
+                            Q(
+                                Q(user__phone__isnull=True) &
+                                Q(user__country__exact='India')
+                            )
+                            # Q(user__IDCard='') |
+                            # Q(user__IDCard__exact=None)
                         )
-                        # Q(user__IDCard='') |
-                        # Q(user__IDCard__exact=None)
+                    ) |
+                    Q(
+                        Q(team__isnull=False) & Q(approver__isnull=False)
                     )
                 )
             if filters.status:
