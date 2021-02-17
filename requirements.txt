@@ -11,7 +11,6 @@ chardet==4.0.0
 chowkidar-graphene==0.1.4
 constantly==15.1.0
 cryptography==3.2.1
-daphne==3.0.1
 Django==3.1.4
 django-ses==1.0.3
 django-storages==1.11
@@ -35,6 +34,7 @@ pyasn1-modules==0.2.8
 pycparser==2.20
 PyHamcrest==2.0.2
 PyJWT==1.7.1
+Pillow=8.1.0
 pyOpenSSL==20.0.1
 python-dateutil==2.8.1
 python-dotenv==0.15.0
@@ -47,7 +47,6 @@ service-identity==18.1.0
 singledispatch==3.4.0.3
 six==1.15.0
 sqlparse==0.4.1
-Twisted==20.3.0
 txaio==20.4.1
 Unidecode==1.1.1
 urllib3==1.26.2

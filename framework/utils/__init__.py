@@ -27,8 +27,16 @@ REG_STATUS_TYPE_CHOICES = (
     (2, 'Changes Requested')
 )
 
+CERTIFICATE_TYPE_CHOICES = (
+    (0, 'Participation'),
+    (1, 'First Place'),
+    (2, 'Second Place'),
+    (3, 'Third Place')
+)
+
 
 __all__ = [
     'USER_TYPE_CHOICES',
+    'CERTIFICATE_TYPE_CHOICES',
     'StaticStorage'
 ]
