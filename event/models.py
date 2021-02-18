@@ -172,7 +172,24 @@ class EventEmail(models.Model):
 def send_emails(sender, instance, created, **kwargs):
     if created:
         if instance.event.isTeamEvent:
-            pass
+            qs = Participant.objects.filter(event=instance.event)
+            if instance.status:
+                if instance.status == 1:
+                    qs = qs.filter(approver__isnull=False)
+                if instance.status == 2:
+                    qs = qs.annotate(
+                        remarks_length=Length('remarks')
+                    ).filter(approver__isnull=True, remarks_length__gt=0)
+            emails = []
+            for p in qs:
+                for m in p.team.members.all():
+                    emails.append(m.email)
+            send_event_emails(
+                subject=instance.subject,
+                emails=emails,
+                url=instance.url,
+                imageURL=instance.image.url if instance and instance.image else None
+            )
         else:
             qs = Participant.objects.filter(event=instance.event)
             if instance.type:
