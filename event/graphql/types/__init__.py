@@ -49,6 +49,7 @@ class Event(graphene.ObjectType):
     formFields = graphene.List(EventFieldData)
     postApprovalFields = graphene.List(EventFieldData)
     parentEvent = graphene.Field('event.graphql.types.Event')
+    hasGallery = graphene.Boolean()
 
     def resolve_registrationCloseTimestamp(self, info):
         to_tz = timezone.get_default_timezone()
@@ -78,6 +79,10 @@ class Event(graphene.ObjectType):
                 if t == str(type):
                     return True
             return False
+
+    def resolve_hasGallery(self, info):
+        from event.models import Submission
+        return Submission.objects.filter(event_id=self.id, isPublic=True).count() > 0
 
 
 class EventSubmission(graphene.ObjectType):
@@ -156,8 +161,13 @@ class Participant(graphene.ObjectType):
         return self.submission_set.all()
 
 
+class GalleryItem(EventSubmission, graphene.ObjectType):
+    participant = graphene.Field(Participant)
+
+
 __all__ = [
     'EventFormData',
     'Event',
-    'Participant'
+    'Participant',
+    'GalleryItem'
 ]

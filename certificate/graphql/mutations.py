@@ -38,13 +38,14 @@ class GenerateParticipationCertificate(graphene.Mutation):
         except EventCertificate.DoesNotExist:
             raise APIException('Certificate not available', code='NOT_AVAILABLE')
 
-
         try:
             generatedCert = GeneratedCertificate.objects.get(
                 event_id=eventID, user_id=userID, participant_id=participant.id, type=0
             )
             if generatedCert.generations > 1:
-                raise APIException('Maximum generations exceeded', code='CANNOT_GENERATE')
+                return GeneratedCertificateFile(
+                    file=generatedCert.file.url
+                )
         except GeneratedCertificate.DoesNotExist:
             generatedCert = GeneratedCertificate(
                 event_id=eventID,
