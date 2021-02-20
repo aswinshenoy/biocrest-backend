@@ -14,11 +14,17 @@ class ParticipantAdmin(admin.ModelAdmin):
 
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['participant', 'event']
+    search_fields = [
+        'participant__user__username', 'participant__user__email',
+        'participant__team__name', 'event__name'
+    ]
 
 
 @admin.register(EventManager)
 class EventManagerAdmin(admin.ModelAdmin):
+    list_display = ['user', 'event']
+    search_fields = ['user__username', 'event__name']
     autocomplete_fields = ['user', 'event']
 
 
