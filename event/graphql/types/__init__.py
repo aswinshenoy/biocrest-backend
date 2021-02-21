@@ -102,6 +102,7 @@ class Participant(graphene.ObjectType):
     profile = graphene.Field(UserProfile)
     team = graphene.Field(TeamProfile)
     formData = graphene.List(EventFormData)
+    postApprovalData = graphene.List(EventFormData)
     timestampRegistered = graphene.String()
     remarks = graphene.String()
     event = graphene.Field(Event)
@@ -151,6 +152,21 @@ class Participant(graphene.ObjectType):
                 pass
         return []
 
+    def resolve_postApprovalData(self, info):
+        if self.postApprovalData:
+            try:
+                d = dict(json.loads(self.postApprovalData))
+                data = []
+                for key, value in d.items():
+                    data.append({
+                        "key": key,
+                        "value": value
+                    })
+                return data
+            except Exception:
+                pass
+        return []
+
     def resolve_event(self, info):
         return self.event
 
@@ -162,7 +178,7 @@ class Participant(graphene.ObjectType):
 
 
 class GalleryItem(EventSubmission, graphene.ObjectType):
-    participant = graphene.Field(Participant)
+    pass
 
 
 __all__ = [

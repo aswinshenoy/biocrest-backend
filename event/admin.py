@@ -9,6 +9,9 @@ class EventAdmin(admin.ModelAdmin):
 
 @admin.register(Participant)
 class ParticipantAdmin(admin.ModelAdmin):
+    search_fields = [
+        'user__username', 'user__email', 'team__name', 'event__name'
+    ]
     autocomplete_fields = ['user', 'event', 'team', 'approver']
 
 

@@ -23,17 +23,30 @@ class Participate(
         eventID = graphene.ID(required=True)
         teamID = graphene.ID(required=False)
         data = graphene.JSONString()
+        postApprovalData = graphene.JSONString()
 
     Output = PT
 
     @login_required
-    def mutate(self, info, eventID: str, teamID: str = None, data: graphene.JSONString = False) -> EventRegistrationResponse:
-        js = None
-        if data is not None:
+    def mutate(
+        self, info, eventID: str, teamID: str = None,
+        data: graphene.JSONString = None, postApprovalData: graphene.JSONString = None
+    ) -> EventRegistrationResponse:
+
+        PAData = None
+        if postApprovalData is not None:
             try:
-                js = json.dumps(data)
+                PAData = json.dumps(postApprovalData)
             except ValueError as e:
                 pass
+
+        formData = None
+        if data is not None:
+            try:
+                formData = json.dumps(data)
+            except ValueError as e:
+                pass
+
         if teamID is not None:
             if not Team.objects.filter(id=teamID, members__id=info.context.userID).exists():
                 raise APIException('Not member of team', code='FORBIDDEN')
@@ -42,14 +55,21 @@ class Participate(
                 p = Participant.objects.get(event_id=eventID, team_id=teamID)
             else:
                 p = Participant.objects.get(event_id=eventID, user_id=info.context.userID)
-            p.formData = js
+            if PAData is not None:
+                if p.approver_id is None:
+                    raise APIException('Participant Not Approved to submit post approval form', code='FORBIDDEN')
+                p.postApprovalData = PAData
+            else:
+                p.formData = formData
             p.save()
             return p
         except Participant.DoesNotExist:
+            if postApprovalData is not None:
+                raise APIException('Participant Not Approved to submit post approval form', code='FORBIDDEN')
             if teamID is not None:
                 return Participant.objects.create(
                     event_id=eventID,
-                    formData=js,
+                    formData=formData,
                     team_id=teamID
                 )
             return Participant.objects.create(
