@@ -74,7 +74,7 @@ class Participate(
                 )
             return Participant.objects.create(
                 event_id=eventID,
-                formData=js,
+                formData=formData,
                 user_id=info.context.userID
             )
 
