@@ -9,7 +9,15 @@ class StaticStorage(S3Boto3Storage):
 EVENT_TYPE_CHOICES = (
     (0, 'Fest'),
     (1, 'Competition'),
-    (2, 'Workshop')
+    (2, 'Workshop'),
+    (3, 'Webinar')
+)
+
+WEBINAR_PLATFORM_CHOICES = (
+    (0, 'Other'),
+    (1, 'Zoom'),
+    (2, 'Microsoft Teams'),
+    (3, 'Jitsi'),
 )
 
 USER_TYPE_CHOICES = (
@@ -17,7 +25,8 @@ USER_TYPE_CHOICES = (
     (1, 'Student'),
     (2, 'Academician'),
     (3, 'Industry'),
-    (4, 'Judge')
+    (4, 'Judge'),
+    (5, 'Press')
 )
 
 
@@ -38,5 +47,8 @@ CERTIFICATE_TYPE_CHOICES = (
 __all__ = [
     'USER_TYPE_CHOICES',
     'CERTIFICATE_TYPE_CHOICES',
+    'EVENT_TYPE_CHOICES',
+    'WEBINAR_PLATFORM_CHOICES',
+    'REG_STATUS_TYPE_CHOICES',
     'StaticStorage'
 ]

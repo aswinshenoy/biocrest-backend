@@ -7,7 +7,10 @@ from django.utils.text import slugify
 from multiselectfield import MultiSelectField
 
 from event.tasks import send_event_emails
-from framework.utils import USER_TYPE_CHOICES, EVENT_TYPE_CHOICES, REG_STATUS_TYPE_CHOICES
+from framework.utils import (
+    USER_TYPE_CHOICES, EVENT_TYPE_CHOICES,
+    REG_STATUS_TYPE_CHOICES, WEBINAR_PLATFORM_CHOICES
+)
 from user.fields import MediaField
 from user.media import EventStorage, SubmissionStorage
 from user.models import User, Team
@@ -15,10 +18,18 @@ from user.models import User, Team
 
 class Event(models.Model):
     name = models.CharField(max_length=255)
-    slug = models.SlugField()
+    slug = models.SlugField(blank=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
     type = models.PositiveSmallIntegerField(choices=EVENT_TYPE_CHOICES, default=0, blank=True)
 
+    logo = MediaField(
+        storage=EventStorage(),
+        max_size=1024 * 1024 * 8,
+        content_types=[
+            'image/png', 'image/jpeg', 'image/gif', 'image/bmp', 'image/webp',
+        ],
+        null=True, blank=True
+    )
     cover = MediaField(
         storage=EventStorage(),
         max_size=1024 * 1024 * 8,
@@ -37,11 +48,13 @@ class Event(models.Model):
     )
     shortDescription = models.CharField(max_length=100, default='', blank=True)
     details = models.TextField(default='', blank=True)
+    customFields = models.JSONField(null=True, blank=True)
 
     isTeamEvent = models.BooleanField(default=False)
     minTeamSize = models.PositiveSmallIntegerField(null=True, blank=True)
     maxTeamSize = models.PositiveSmallIntegerField(null=True, blank=True)
 
+    requireRegistration = models.BooleanField(default=True)
     acceptRegistrations = models.BooleanField(default=True)
     registrationCloseTimestamp = models.DateTimeField(null=True, blank=True)
     allowedUserTypes = MultiSelectField(choices=USER_TYPE_CHOICES, max_choices=10, max_length=255, null=True, blank=True)
@@ -49,6 +62,16 @@ class Event(models.Model):
     formFields = models.JSONField(null=True, blank=True)
     requireApproval = models.BooleanField(default=False)
     postApprovalFields = models.JSONField(null=True, blank=True)
+
+    enableGallery = models.BooleanField(default=False)
+
+    startTimestamp = models.DateTimeField(null=True, blank=True)
+    endTimestamp = models.DateTimeField(null=True, blank=True)
+
+    webinarPlatform = models.PositiveSmallIntegerField(
+        choices=WEBINAR_PLATFORM_CHOICES, null=True, blank=True
+    )
+    webinarLink = models.URLField(null=True, blank=True)
 
     def _generate_slug(self):
         self.slug = slugify(self.name, allow_unicode=True)
@@ -86,7 +109,7 @@ class Participant(models.Model):
 
     class Meta:
         unique_together = [
-            ('user', 'event')
+            ('user', 'team', 'event')
         ]
         db_table = 'participant'
         verbose_name_plural = "Event Participants"

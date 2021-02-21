@@ -1,9 +1,10 @@
 import graphene
 import json
 
-from django.db.models import Avg
+from django.db.models import Avg, Q
 from django.utils import timezone
 
+from framework.graphql.scalars import ISOTimestamp
 from user.graphql.types import UserProfile, TeamProfile
 from user.models import User
 
@@ -45,16 +46,42 @@ class Event(graphene.ObjectType):
     requireApproval = graphene.Boolean()
     acceptRegistrations = graphene.Boolean()
     isUserAllowedToRegister = graphene.Boolean()
-    registrationCloseTimestamp = graphene.String()
+    requireRegistration = graphene.Boolean()
+    registrationCloseTimestamp = ISOTimestamp()
     formFields = graphene.List(EventFieldData)
     postApprovalFields = graphene.List(EventFieldData)
     parentEvent = graphene.Field('event.graphql.types.Event')
     hasGallery = graphene.Boolean()
+    webinarLink = graphene.String()
+    webinarPlatform = graphene.String()
+    startTimestamp = ISOTimestamp()
+    endTimestamp = ISOTimestamp()
 
-    def resolve_registrationCloseTimestamp(self, info):
-        to_tz = timezone.get_default_timezone()
-        if self.registrationCloseTimestamp:
-            return self.registrationCloseTimestamp.astimezone(to_tz).isoformat()
+    def resolve_webinarLink(self, info):
+        if self.requireRegistration:
+            if info.context.userID:
+                from event.models import Participant
+                if self.requireApproval:
+                    if Participant.objects.filter(
+                        Q(
+                            Q(team__members=info.context.userID) |
+                            Q(user_id=info.context.userID)
+                        ) &
+                        Q(event_id=self.id) &
+                        Q(approver__isnull=False)
+                    ).exists():
+                        return self.webinarLink
+                else:
+                    if Participant.objects.filter(
+                        Q(
+                            Q(team__members=info.context.userID) |
+                            Q(user_id=info.context.userID)
+                        ) &
+                        Q(event_id=self.id)
+                    ).exists():
+                        return self.webinarLink
+        else:
+            return self.webinarLink
 
     def resolve_coverURL(self, info):
         if self and self.cover and hasattr(self.cover, 'url') and self.cover.url:
@@ -82,7 +109,12 @@ class Event(graphene.ObjectType):
 
     def resolve_hasGallery(self, info):
         from event.models import Submission
-        return Submission.objects.filter(event_id=self.id, isPublic=True).count() > 0
+        return (
+            self.enableGallery and
+            Submission.objects.filter(
+                event_id=self.id, isPublic=True
+            ).count() > 0
+        )
 
 
 class EventSubmission(graphene.ObjectType):
@@ -90,6 +122,7 @@ class EventSubmission(graphene.ObjectType):
     url = graphene.String()
     fileURL = graphene.String()
     key = graphene.String()
+    timestamp = ISOTimestamp()
 
     def resolve_fileURL(self, info):
         if self and self.file and hasattr(self.file, 'url') and self.file.url:
@@ -103,7 +136,7 @@ class Participant(graphene.ObjectType):
     team = graphene.Field(TeamProfile)
     formData = graphene.List(EventFormData)
     postApprovalData = graphene.List(EventFormData)
-    timestampRegistered = graphene.String()
+    timestampRegistered = ISOTimestamp()
     remarks = graphene.String()
     event = graphene.Field(Event)
     isApproved = graphene.Boolean()
@@ -111,6 +144,7 @@ class Participant(graphene.ObjectType):
     submissions = graphene.List(EventSubmission)
     avgPoints = graphene.Int()
     myPoints = graphene.Int()
+    timestampApproved = ISOTimestamp()
 
     def resolve_avgPoints(self, info):
         if info.context.userID:
@@ -132,10 +166,6 @@ class Participant(graphene.ObjectType):
     def resolve_team(self, info):
         if self.team:
             return self.team
-
-    def resolve_timestampRegistered(self, info):
-        to_tz = timezone.get_default_timezone()
-        return self.timestampRegistered.astimezone(to_tz).isoformat()
 
     def resolve_formData(self, info):
         if self.formData:

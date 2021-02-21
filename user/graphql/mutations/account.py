@@ -47,7 +47,7 @@ class RegisterUser(
             user.save()
             code = generate_otp()
             UserVerificationOTP.objects.create(code=code, user=user, isPhoneOTP=False)
-            send_email_confirmation_email(user=user, code=code)
+            send_email_confirmation_email(user=user, code=code, eventID=input.eventID)
             return AccountMutationResponse(success=True, returning=user)
 
 

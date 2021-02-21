@@ -5,6 +5,7 @@ from .models import *
 @admin.register(Event)
 class EventAdmin(admin.ModelAdmin):
     search_fields = ['name', 'slug']
+    autocomplete_fields = ['parent']
 
 
 @admin.register(Participant)

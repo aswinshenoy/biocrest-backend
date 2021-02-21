@@ -6,6 +6,7 @@ class UserCreationInput(graphene.InputObjectType):
     name = graphene.String()
     email = graphene.String(required=True)
     password = graphene.String(required=True)
+    eventID = graphene.ID()
 
 
 class UserUpdationInput(UserCreationInput, graphene.InputObjectType):

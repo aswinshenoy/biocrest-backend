@@ -1,7 +1,7 @@
 from django.core.mail import send_mail
 from django.template.loader import get_template
 from django.utils.html import strip_tags
-from huey.contrib.djhuey import task
+from huey.contrib.djhuey import task, db_task
 
 
 @task()
@@ -25,18 +25,37 @@ def send_otp_to_number(code, number) -> None:
     print(r.content)
 
 
-@task()
-def send_email_confirmation_email(user, code) -> None:
+@db_task()
+def send_email_confirmation_email(user, code, eventID=None) -> None:
     data = {
         "name": user.username,
         "code": code,
     }
+    eventName = 'Amrita EMS'
+    emailHost = 'verify'
+    eventLogo = ''
+    if eventID is not None:
+        from event.models import Event
+        try:
+            event = Event.objects.get(event=eventID)
+            if event.name is not None:
+                eventName = event.name
+            if event.slug is not None:
+                emailHost = event.slug
+            if event.logo is not None and event.logo.url:
+                eventLogo = event.logo.url
+        except Event.DoesNotExist:
+            pass
+
+    data['eventName'] = eventName
+    data['eventLogo'] = eventLogo
+
     htmly = get_template('./emails/email-verification.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Amrita Biocrest: Verify Your Email',
+        subject=eventName + ': Verify Your Email',
         message=strip_tags(html_content),
-        from_email='biocrest@amritauniversity.info',
+        from_email=emailHost+'@amritauniversity.info',
         recipient_list=[user.email],
         html_message=html_content,
         fail_silently=False,
@@ -44,17 +63,37 @@ def send_email_confirmation_email(user, code) -> None:
 
 
 @task()
-def send_password_reset_email(user, code) -> None:
+def send_password_reset_email(user, code, eventID=None) -> None:
     data = {
         "name": user.username,
         "code": code,
     }
+
+    eventName = 'Amrita EMS'
+    emailHost = 'verify'
+    eventLogo = ''
+    if eventID is not None:
+        from event.models import Event
+        try:
+            event = Event.objects.get(event=eventID)
+            if event.name is not None:
+                eventName = event.name
+            if event.slug is not None:
+                emailHost = event.slug
+            if event.logo is not None and event.logo.url:
+                eventLogo = event.logo.url
+        except Event.DoesNotExist:
+            pass
+
+    data['eventName'] = eventName
+    data['eventLogo'] = eventLogo
+
     htmly = get_template('./emails/reset-password.html')
     html_content = htmly.render(data)
     send_mail(
-        subject='Amrita Biocrest: Reset Your Password',
+        subject=eventName + ': Reset Your Password',
         message=strip_tags(html_content),
-        from_email='biocrest@amritauniversity.info',
+        from_email=emailHost+'@amritauniversity.info',
         recipient_list=[user.email],
         html_message=html_content,
         fail_silently=False,
