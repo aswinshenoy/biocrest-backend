@@ -1,16 +1,89 @@
 import graphene
-from chowkidar.graphql.decorators import login_required
+from chowkidar.graphql.decorators import login_required, resolve_user
 from chowkidar.graphql.exceptions import APIException
 from chowkidar.graphql.scalars import Upload
 from django.utils import timezone
 
-from event.models import Participant, Event, EventEmail
+from event.models import Participant, Event, EventEmail, EventManager
 from event.tasks import (
     send_email_requesting_correction,
     send_email_confirming_registration,
     send_status_to_number
 )
 from user.graphql.inputs import UserUpdationInput
+from user.utils import generate_username_from_email
+
+
+class AddJudgeResponse(graphene.ObjectType):
+    newAccount = graphene.Boolean()
+    password = graphene.String()
+
+
+class AddJudge(graphene.Mutation):
+    class Arguments:
+        eventID = graphene.ID(required=True)
+        email = graphene.String()
+        defaultPassword = graphene.String()
+        autoCreate = graphene.Boolean()
+
+    Output = AddJudgeResponse
+
+    @resolve_user
+    def mutate(
+        self, info,
+        eventID,
+        email: str = None,
+        defaultPassword: str = None,
+        autoCreate: bool = True
+    ) -> AddJudgeResponse:
+        password = 'B!0crest'
+
+        from user.models import User
+        if (
+            info.context.user.type == 0 or
+            info.context.user.is_staff or
+            info.context.user.is_superuser or
+            EventManager.objects.filter(
+                user=info.context.user, canReviewRegistrations=True
+            ).exists()
+        ):
+            try:
+                user = User.objects.get(email=email)
+                user.type = 4
+                user.save()
+                newAccount = False
+            except User.DoesNotExist:
+                if not autoCreate:
+                    raise APIException('The judge does not have an account', code='INVALID_EMAIL')
+                user = User.objects.create(
+                    username=generate_username_from_email(email),
+                    type=4,
+                    email=email
+                )
+                if defaultPassword is not None:
+                    password = defaultPassword
+                user.set_password(password)
+                user.save()
+                newAccount = True
+            try:
+                eventManager = EventManager.objects.get(
+                    event_id=eventID,
+                    user=user
+                )
+                eventManager.canJudgeParticipants = True
+                eventManager.save()
+            except EventManager.DoesNotExist:
+                EventManager.objects.create(
+                    event_id=eventID,
+                    user=user,
+                    canViewRegistrations=False,
+                    canJudgeParticipants=True
+                )
+            return AddJudgeResponse(
+                newAccount=newAccount,
+                password=password if newAccount else None
+            )
+        raise APIException('You dont have permission to perform this action', code='FORBIDDEN')
 
 
 class ReviewParticipant(graphene.Mutation):
@@ -112,7 +185,7 @@ class SendBulkEmails(graphene.Mutation):
     ) -> bool:
         try:
             event = Event.objects.get(id=eventID)
-            if event.eventmanager_set.filter(user_id=info.context.userID, canReviewRegistrations=True).exists():
+            if event.eventmanager_set.filter(user_id=info.context.userID, canSendEmails=True).exists():
                 EventEmail.objects.create(
                     event=event,
                     subject=subject,
@@ -131,8 +204,10 @@ class SendBulkEmails(graphene.Mutation):
 class ManagerMutations(graphene.ObjectType):
     reviewParticipant = ReviewParticipant.Field()
     sendBulkEmails = SendBulkEmails.Field()
+    addJudge = AddJudge.Field()
 
 
 __all__ = [
     'ManagerMutations'
 ]
+

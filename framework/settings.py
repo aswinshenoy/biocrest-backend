@@ -33,7 +33,9 @@ INSTALLED_APPS = [
     # 'payment',
 ]
 
+
 MIDDLEWARE = [
+    'framework.utils.auth.CORSMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -42,6 +44,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 AUTH_USER_MODEL = 'user.User'
 ROOT_URLCONF = 'framework.urls'
@@ -113,7 +116,8 @@ GRAPHENE = {
     'SCHEMA': 'framework.graphql.schema',
     'MIDDLEWARE': [
         'chowkidar.auth.ChowkidarAuthMiddleware',
-        'graphene_django.debug.DjangoDebugMiddleware'
+        'graphene_django.debug.DjangoDebugMiddleware',
+        'framework.utils.auth.DisableProtectedAPIMiddleware',
     ],
 }
 
