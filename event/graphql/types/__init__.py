@@ -2,7 +2,6 @@ import graphene
 import json
 
 from django.db.models import Avg, Q
-from django.utils import timezone
 
 from framework.graphql.scalars import ISOTimestamp
 from user.graphql.types import UserProfile, TeamProfile
@@ -36,6 +35,7 @@ class Event(graphene.ObjectType):
     id = graphene.ID()
     name = graphene.String()
     slug = graphene.String()
+    type = graphene.Int()
     shortDescription = graphene.String()
     details = graphene.String()
     coverURL = graphene.String()
@@ -140,6 +140,7 @@ class Participant(graphene.ObjectType):
     remarks = graphene.String()
     event = graphene.Field(Event)
     isApproved = graphene.Boolean()
+    isEliminated = graphene.Boolean()
     remarks = graphene.String()
     submissions = graphene.List(EventSubmission)
     avgPoints = graphene.Int()
@@ -202,6 +203,9 @@ class Participant(graphene.ObjectType):
 
     def resolve_isApproved(self, info):
         return self.approver_id is not None
+
+    def resolve_isEliminated(self, info):
+        return self.eliminator_id is not None
 
     def resolve_submissions(self, info):
         return self.submission_set.all()

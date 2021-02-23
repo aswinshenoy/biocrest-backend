@@ -30,6 +30,8 @@ class ParticipantQueries(graphene.ObjectType):
         after=graphene.String(),
         search=graphene.String(),
         publicListing=graphene.Boolean(),
+        eliminatorListing=graphene.Boolean(),
+        judgeListing=graphene.Boolean(),
         filters=graphene.Argument(ParticipantQueryFilters)
     )
 
@@ -66,11 +68,37 @@ class ParticipantQueries(graphene.ObjectType):
         after: str = None,
         search: str = None,
         publicListing=False,
+        eliminatorListing=False,
+        judgeListing=False,
         filters: ParticipantQueryFilters = None
     ):
         if publicListing:
-            qs = Participant.objects.filter(event_id=eventID, timestampApproved__isnull=False, approver__isnull=False)
-        elif EventManager.objects.filter(user_id=info.context.userID, event_id=eventID, canReviewRegistrations=True).exists():
+            qs = Participant.objects.filter(event_id=eventID, approver__isnull=False)
+        elif eliminatorListing:
+            if EventManager.objects.filter(
+                user_id=info.context.userID, event_id=eventID, canEliminateParticipants=True
+            ).exists():
+                qs = Participant.objects.filter(
+                    event_id=eventID,
+                    approver__isnull=False,
+                    eliminator__isnull=True
+                )
+            else:
+                raise APIException('Not allowed', code='FORBIDDEN')
+        elif judgeListing:
+            if EventManager.objects.filter(
+                user_id=info.context.userID, event_id=eventID, canJudgeParticipants=True
+            ).exists():
+                qs = Participant.objects.filter(
+                    event_id=eventID,
+                    approver__isnull=False,
+                    eliminator__isnull=True
+                )
+            else:
+                raise APIException('Not allowed', code='FORBIDDEN')
+        elif EventManager.objects.filter(
+            user_id=info.context.userID, event_id=eventID, canReviewRegistrations=True
+        ).exists():
             qs = Participant.objects.filter(event_id=eventID)
         else:
             raise APIException('You are not allowed to view registrations from this event', code='FORBIDDEN')

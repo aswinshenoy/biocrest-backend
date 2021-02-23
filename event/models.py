@@ -56,6 +56,7 @@ class Event(models.Model):
 
     requireRegistration = models.BooleanField(default=True)
     acceptRegistrations = models.BooleanField(default=True)
+    slotLimits = models.PositiveSmallIntegerField(null=True, blank=True)
     registrationCloseTimestamp = models.DateTimeField(null=True, blank=True)
     allowedUserTypes = MultiSelectField(choices=USER_TYPE_CHOICES, max_choices=10, max_length=255, null=True, blank=True)
 
@@ -102,6 +103,10 @@ class Participant(models.Model):
     formData = models.JSONField(null=True, blank=True)
     postApprovalData = models.JSONField(null=True, blank=True)
     timestampRegistered = models.DateTimeField(auto_now=True)
+
+    eliminator = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='eliminator', null=True, blank=True)
+    timestampEliminated = models.DateTimeField(null=True, blank=True)
+    feedback = models.CharField(max_length=255, default='', blank=True)
 
     approver = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='approver', null=True, blank=True)
     timestampApproved = models.DateTimeField(null=True, blank=True)
@@ -155,6 +160,7 @@ class EventManager(models.Model):
     canReviewRegistrations = models.BooleanField(default=False)
     canJudgeParticipants = models.BooleanField(default=False)
     canSendEmails = models.BooleanField(default=False)
+    canEliminateParticipants = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [

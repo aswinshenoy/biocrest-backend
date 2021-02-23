@@ -166,6 +166,43 @@ class ReviewParticipant(graphene.Mutation):
             raise APIException('Participant not found', code='REG_NOT_FOUND')
 
 
+class EliminateParticipant(graphene.Mutation):
+    class Arguments:
+        participantID = graphene.ID(required=True)
+        feedback = graphene.String()
+
+    Output = graphene.Boolean
+
+    @login_required
+    def mutate(
+        self, info,
+        participantID: graphene.ID, feedback=None,
+    ) -> bool:
+        try:
+            reg = Participant.objects.get(id=participantID)
+            if reg.event.eventmanager_set.filter(user_id=info.context.userID, canEliminateParticipants=True).exists():
+                # user = reg.user
+                # team = reg.team
+                reg.eliminator_id = info.context.userID
+                reg.timestampEliminated = timezone.now()
+                reg.feedback = feedback if feedback else ''
+                reg.save()
+                # if user:
+                #     if user.phone and user.isPhoneVerified:
+                #         send_status_to_number(number=user.phone, isApproved=True, name=reg.event.name)
+                #     send_email_confirming_registration(user=user, participant=reg)
+                # elif team:
+                #     if team.leader and team.leader.phone and team.leader.isPhoneVerified:
+                #         send_status_to_number(number=team.leader.phone, isApproved=True, name=reg.event.name)
+                #     for m in team.members.all():
+                #         send_email_confirming_registration(user=m, participant=reg)
+                return True
+            else:
+                raise APIException('You are not allowed to eliminate registrations', code='FORBIDDEN')
+        except Participant.DoesNotExist:
+            raise APIException('Participant not found', code='REG_NOT_FOUND')
+
+
 class SendBulkEmails(graphene.Mutation):
     class Arguments:
         eventID = graphene.ID(required=True)
@@ -203,6 +240,7 @@ class SendBulkEmails(graphene.Mutation):
 
 class ManagerMutations(graphene.ObjectType):
     reviewParticipant = ReviewParticipant.Field()
+    eliminateParticipant = EliminateParticipant.Field()
     sendBulkEmails = SendBulkEmails.Field()
     addJudge = AddJudge.Field()
 
