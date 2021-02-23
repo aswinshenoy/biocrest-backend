@@ -1,3 +1,5 @@
+from django import http
+
 from user.models import User
 
 
@@ -29,10 +31,18 @@ class CORSMiddleware(object):
     def __call__(self, request):
         response = self.get_response(request)
         http_host = "*"
-        if hasattr(request, "meta") and "HTTP_ORIGIN" in request.meta:
+        if hasattr(request, "META") and "HTTP_ORIGIN" in request.META:
             http_host = request.META["HTTP_ORIGIN"]
+        if hasattr(request, "META") and (
+                request.method == "OPTIONS" and "HTTP_ACCESS_CONTROL_REQUEST_METHOD" in request.META
+        ):
+            response = http.HttpResponse()
+            response["Content-Length"] = "0"
+            response["Access-Control-Max-Age"] = 86400
         response["Access-Control-Allow-Origin"] = http_host
         response["Access-Control-Allow-Credentials"] = "true"
+        response["Access-Control-Allow-Methods"] = "DELETE, GET, OPTIONS, PATCH, POST, PUT"
+        response["Access-Control-Allow-Headers"] = "accept, accept-encoding, authorization, content-type, dnt, origin, user-agent, x-csrftoken, x-requested-with"
         return response
 
 
