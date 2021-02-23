@@ -33,11 +33,11 @@ def send_email_confirmation_email(user, code, eventID=None) -> None:
     }
     eventName = 'Amrita EMS'
     emailHost = 'verify'
-    eventLogo = ''
+    eventLogo = 'https://i.imgur.com/ymsmLdH.png'
     if eventID is not None:
         from event.models import Event
         try:
-            event = Event.objects.get(event=eventID)
+            event = Event.objects.get(id=eventID)
             if event.name is not None:
                 eventName = event.name
             if event.slug is not None:
