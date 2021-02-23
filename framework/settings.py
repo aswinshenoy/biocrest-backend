@@ -121,6 +121,8 @@ GRAPHENE = {
     ],
 }
 
+JWT_COOKIE_SAME_SITE = 'None'
+
 # Task Queue
 taskQueueRedisHost = env.str('TASK_QUEUE_REDIS_HOST', default='')
 HUEY = {
