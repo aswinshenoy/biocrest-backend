@@ -121,7 +121,12 @@ GRAPHENE = {
     ],
 }
 
+# Chowkidar Settings
 JWT_COOKIE_SAME_SITE = 'None'
+JWT_COOKIE_SECURE = True
+JWT_COOKIE_HTTP_ONLY = True
+if DEBUG:
+    JWT_COOKIE_SECURE = False
 
 # Task Queue
 taskQueueRedisHost = env.str('TASK_QUEUE_REDIS_HOST', default='')
