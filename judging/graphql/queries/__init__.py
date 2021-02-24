@@ -1,14 +1,18 @@
 import graphene
 from chowkidar.graphql.decorators import resolve_user
-from django.db.models import Avg
+from django.db.models import Avg, Count, Max, Min, StdDev, Variance
 
 from event.graphql.types import Participant
 from judging.models import ParticipantJudgement
 
 
 class JudgedParticipant(graphene.ObjectType):
-    avgPoints = graphene.Int()
+    avgPoints = graphene.Float()
     noOfJudges = graphene.Int()
+    highScore = graphene.Int()
+    lowScore = graphene.Int()
+    stdDiv = graphene.Float()
+    variance = graphene.Float()
     participant = graphene.Field(Participant)
 
     def resolve_participant(self, info):
@@ -33,14 +37,20 @@ class JudgingQueries(graphene.ObjectType):
         if info.context.user.type == 0:
             return ParticipantJudgement.objects.filter(
                 participant__approver__isnull=False, participant__event_id=eventID
-            ).values('participant').order_by('participant').annotate(avgPoints=Avg('points')).order_by('-avgPoints')
+            ).values('participant').order_by('participant').annotate(
+                avgPoints=Avg('points'),
+                highScore=Max('points'),
+                lowScore=Min('points'),
+                stdDiv=StdDev('points'),
+                variance=Variance('points'),
+                noOfJudges=Count('id')
+            ).order_by('-avgPoints')
 
     @resolve_user
     def resolve_eventsToJudge(self, info):
         if info.context.user.type == 4:
             from event.models import Event, EventManager
             eventIDs = EventManager.objects.filter(user=info.context.user, canJudgeParticipants=True).values_list('event_id', flat=True)
-            print('oomb')
             return Event.objects.filter(id__in=eventIDs)
 
 
