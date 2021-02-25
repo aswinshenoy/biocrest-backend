@@ -203,6 +203,30 @@ class EliminateParticipant(graphene.Mutation):
             raise APIException('Participant not found', code='REG_NOT_FOUND')
 
 
+class DeclareWinner(graphene.Mutation):
+    class Arguments:
+        participantID = graphene.ID(required=True)
+        prizeID = graphene.Int(required=True)
+
+    Output = graphene.Boolean
+
+    @login_required
+    def mutate(
+        self, info,
+        participantID: graphene.ID, prizeID: int,
+    ) -> bool:
+        try:
+            reg = Participant.objects.get(id=participantID)
+            if reg.event.eventmanager_set.filter(user_id=info.context.userID, canReviewRegistrations=True).exists():
+                reg.prize = prizeID
+                reg.save()
+                return True
+            else:
+                raise APIException('You are not allowed to declare winners', code='FORBIDDEN')
+        except Participant.DoesNotExist:
+            raise APIException('Participant not found', code='REG_NOT_FOUND')
+
+
 class SendBulkEmails(graphene.Mutation):
     class Arguments:
         eventID = graphene.ID(required=True)
@@ -241,6 +265,7 @@ class SendBulkEmails(graphene.Mutation):
 class ManagerMutations(graphene.ObjectType):
     reviewParticipant = ReviewParticipant.Field()
     eliminateParticipant = EliminateParticipant.Field()
+    declareWinner = DeclareWinner.Field()
     sendBulkEmails = SendBulkEmails.Field()
     addJudge = AddJudge.Field()
 

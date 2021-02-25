@@ -43,6 +43,11 @@ CERTIFICATE_TYPE_CHOICES = (
     (3, 'Third Place')
 )
 
+PARTICIPANT_PRIZE_CHOICES = (
+    (1, 'First Place'),
+    (2, 'Second Place'),
+    (3, 'Third Place')
+)
 
 __all__ = [
     'USER_TYPE_CHOICES',

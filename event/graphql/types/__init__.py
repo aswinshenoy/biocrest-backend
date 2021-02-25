@@ -8,6 +8,22 @@ from user.graphql.types import UserProfile, TeamProfile
 from user.models import User
 
 
+class EventWinner(graphene.ObjectType):
+    name = graphene.String()
+    prize = graphene.Int()
+    submissions = graphene.List('event.graphql.types.EventSubmission')
+
+    def resolve_name(self, info):
+        if self.user:
+            return self.user.title + ' ' + self.user.name
+
+    def resolve_submissions(self, info):
+        from event.models import Submission
+        return Submission.objects.filter(
+            participant=self, isPublic=True
+        )
+
+
 class EventFormData(graphene.ObjectType):
     key = graphene.String()
     value = graphene.String()
@@ -56,6 +72,22 @@ class Event(graphene.ObjectType):
     webinarPlatform = graphene.String()
     startTimestamp = ISOTimestamp()
     endTimestamp = ISOTimestamp()
+    hasWinners = graphene.Boolean()
+    winners = graphene.List(
+        'event.graphql.types.EventWinner'
+    )
+
+    def resolve_hasWinners(self, info):
+        from event.models import Participant
+        return Participant.objects.filter(
+            event=self, prize__isnull=False
+        ).exists()
+
+    def resolve_winners(self, info):
+        from event.models import Participant
+        return Participant.objects.filter(
+            event=self, prize__isnull=False
+        ).order_by('prize')
 
     def resolve_webinarLink(self, info):
         if self.requireRegistration:
@@ -141,10 +173,12 @@ class Participant(graphene.ObjectType):
     event = graphene.Field(Event)
     isApproved = graphene.Boolean()
     isEliminated = graphene.Boolean()
+    isCertificateAvailable = graphene.Boolean()
     remarks = graphene.String()
     submissions = graphene.List(EventSubmission)
     avgPoints = graphene.Int()
     myPoints = graphene.Int()
+    prize = graphene.Int()
     timestampApproved = ISOTimestamp()
 
     def resolve_avgPoints(self, info):
@@ -209,6 +243,15 @@ class Participant(graphene.ObjectType):
 
     def resolve_submissions(self, info):
         return self.submission_set.all()
+
+    def resolve_isCertificateAvailable(self, info):
+        from certificate.models import EventCertificate
+        certType = 0
+        if self.prize:
+            certType = self.prize
+        return self.approver_id is not None and EventCertificate.objects.filter(
+            event=self.event, isReleased=True, type=certType
+        ).exists()
 
 
 class GalleryItem(EventSubmission, graphene.ObjectType):

@@ -9,7 +9,7 @@ from multiselectfield import MultiSelectField
 from event.tasks import send_event_emails
 from framework.utils import (
     USER_TYPE_CHOICES, EVENT_TYPE_CHOICES,
-    REG_STATUS_TYPE_CHOICES, WEBINAR_PLATFORM_CHOICES
+    REG_STATUS_TYPE_CHOICES, WEBINAR_PLATFORM_CHOICES, PARTICIPANT_PRIZE_CHOICES
 )
 from user.fields import MediaField
 from user.media import EventStorage, SubmissionStorage
@@ -58,7 +58,9 @@ class Event(models.Model):
     acceptRegistrations = models.BooleanField(default=True)
     slotLimits = models.PositiveSmallIntegerField(null=True, blank=True)
     registrationCloseTimestamp = models.DateTimeField(null=True, blank=True)
-    allowedUserTypes = MultiSelectField(choices=USER_TYPE_CHOICES, max_choices=10, max_length=255, null=True, blank=True)
+    allowedUserTypes = MultiSelectField(
+        choices=USER_TYPE_CHOICES, max_choices=10, max_length=255, null=True, blank=True
+    )
 
     formFields = models.JSONField(null=True, blank=True)
     requireApproval = models.BooleanField(default=False)
@@ -103,6 +105,10 @@ class Participant(models.Model):
     formData = models.JSONField(null=True, blank=True)
     postApprovalData = models.JSONField(null=True, blank=True)
     timestampRegistered = models.DateTimeField(auto_now=True)
+
+    prize = models.PositiveSmallIntegerField(
+        choices=PARTICIPANT_PRIZE_CHOICES, null=True, blank=True
+    )
 
     eliminator = models.ForeignKey(User, on_delete=models.SET_NULL, related_name='eliminator', null=True, blank=True)
     timestampEliminated = models.DateTimeField(null=True, blank=True)

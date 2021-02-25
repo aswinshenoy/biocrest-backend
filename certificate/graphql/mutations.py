@@ -30,10 +30,14 @@ class GenerateParticipationCertificate(graphene.Mutation):
         except Participant.DoesNotExist:
             raise APIException('Participant does not exist', code='PARTICIPANT_NOT_FOUND')
 
+        certType = 0
+        if participant.prize:
+            certType = participant.prize
+
         try:
             eventCert = EventCertificate.objects.get(
                 event_id=eventID,
-                isReleased=True
+                isReleased=True, type=certType
             )
         except EventCertificate.DoesNotExist:
             raise APIException('Certificate not available', code='NOT_AVAILABLE')
