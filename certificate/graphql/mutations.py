@@ -32,7 +32,7 @@ class GenerateParticipationCertificate(graphene.Mutation):
 
         certType = 0
         if participant.prize:
-            certType = participant.prize
+            certType = 1
 
         try:
             eventCert = EventCertificate.objects.get(
@@ -99,6 +99,21 @@ class GenerateParticipationCertificate(graphene.Mutation):
             d.text(
                 (eventCert.eventNamePositionX, eventCert.eventNamePositionY),
                 eventCert.event.name,
+                fill=eventCert.fontColor,
+                font=font
+            )
+
+        if eventCert.includePrizePosition:
+            position = ''
+            if participant.prize == 1:
+                position = 'First'
+            elif participant.prize == 2:
+                position = 'Second'
+            elif participant.prize == 3:
+                position = 'Third'
+            d.text(
+                (eventCert.prizePositionX, eventCert.prizePositionY),
+                position,
                 fill=eventCert.fontColor,
                 font=font
             )

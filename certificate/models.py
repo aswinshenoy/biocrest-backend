@@ -26,6 +26,10 @@ class EventCertificate(models.Model):
     eventNamePositionX = models.PositiveSmallIntegerField(default=0)
     eventNamePositionY = models.PositiveSmallIntegerField(default=0)
 
+    includePrizePosition = models.BooleanField(default=False)
+    prizePositionX = models.PositiveSmallIntegerField(default=0)
+    prizePositionY = models.PositiveSmallIntegerField(default=0)
+
     isReleased = models.BooleanField(default=True)
     template = MediaField(
         storage=CertificateTemplateStorage(),
@@ -52,7 +56,7 @@ class GeneratedCertificate(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     participant = models.ForeignKey(Participant, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    type = models.PositiveSmallIntegerField(CERTIFICATE_TYPE_CHOICES, default=0)
+    type = models.PositiveSmallIntegerField(choices=CERTIFICATE_TYPE_CHOICES, default=0)
 
     file = MediaField(
         storage=CertificateStorage(),

@@ -248,7 +248,7 @@ class Participant(graphene.ObjectType):
         from certificate.models import EventCertificate
         certType = 0
         if self.prize:
-            certType = self.prize
+            certType = 1
         return self.approver_id is not None and EventCertificate.objects.filter(
             event=self.event, isReleased=True, type=certType
         ).exists()
