@@ -4,6 +4,7 @@ import graphene
 class TeamProfile(graphene.ObjectType):
     id = graphene.Int()
     name = graphene.String()
+    leader = graphene.Field('user.graphql.types.UserProfile')
     members = graphene.List('user.graphql.types.UserProfile')
 
     def resolve_members(self, info):

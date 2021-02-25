@@ -6,6 +6,11 @@ from event.graphql.types import Participant
 from judging.models import ParticipantJudgement
 
 
+class Judgements(graphene.ObjectType):
+    judge = graphene.Field('user.graphql.types.user.UserProfile')
+    points = graphene.Int()
+
+
 class JudgedParticipant(graphene.ObjectType):
     avgPoints = graphene.Float()
     noOfJudges = graphene.Int()
@@ -28,6 +33,10 @@ class JudgingQueries(graphene.ObjectType):
         JudgedParticipant,
         eventID=graphene.ID(required=True)
     )
+    participantScores = graphene.List(
+        Judgements,
+        participantID=graphene.ID(required=True)
+    )
     eventsToJudge = graphene.List(
         'event.graphql.types.Event'
     )
@@ -47,10 +56,19 @@ class JudgingQueries(graphene.ObjectType):
             ).order_by('-avgPoints')
 
     @resolve_user
+    def resolve_participantScores(self, info, participantID):
+        if info.context.user.type == 0:
+            return ParticipantJudgement.objects.filter(
+                participant_id=participantID
+            ).order_by('-timestamp')
+
+    @resolve_user
     def resolve_eventsToJudge(self, info):
         if info.context.user.type == 4:
             from event.models import Event, EventManager
-            eventIDs = EventManager.objects.filter(user=info.context.user, canJudgeParticipants=True).values_list('event_id', flat=True)
+            eventIDs = EventManager.objects.filter(
+                user=info.context.user, canJudgeParticipants=True
+            ).values_list('event_id', flat=True)
             return Event.objects.filter(id__in=eventIDs)
 
 
