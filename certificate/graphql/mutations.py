@@ -28,7 +28,7 @@ class GenerateParticipationCertificate(graphene.Mutation):
                 Q(Q(user_id=userID) | Q(team__members=userID))
             )
         except Participant.DoesNotExist:
-            raise APIException('Participant does not ', code='PARTICIPANT_NOT_FOUND')
+            raise APIException('Participant does not exist', code='PARTICIPANT_NOT_FOUND')
 
         try:
             eventCert = EventCertificate.objects.get(
@@ -37,6 +37,9 @@ class GenerateParticipationCertificate(graphene.Mutation):
             )
         except EventCertificate.DoesNotExist:
             raise APIException('Certificate not available', code='NOT_AVAILABLE')
+
+        if eventCert.event.requireApproval and participant.approver_id is None:
+            raise APIException('Certificate not issuable', code='FORBIDDEN')
 
         try:
             generatedCert = GeneratedCertificate.objects.get(
@@ -55,7 +58,6 @@ class GenerateParticipationCertificate(graphene.Mutation):
                 generations=1
             )
 
-        name = user.title + ' ' + user.name
         from PIL import Image, ImageDraw, ImageFont
         from requests import get
         from io import BytesIO
@@ -63,18 +65,39 @@ class GenerateParticipationCertificate(graphene.Mutation):
         im = Image.open(eventCert.template)
         d = ImageDraw.Draw(im)
 
-        location = (eventCert.namePositionX, eventCert.namePositionY)
-
-        if eventCert.nameFontURL is not None and len(eventCert.nameFontURL) > 5:
-            fontURL = eventCert.nameFontURL
+        if eventCert.fontURL is not None and len(eventCert.fontURL) > 5:
+            fontURL = eventCert.fontURL
         else:
-            fontName = eventCert.nameFontName if eventCert.nameFontName else 'Roboto-Regular'
-            fontURL = 'https://github.com/googlefonts/roboto/blob/master/src/hinted/' + fontName + '.ttf?raw=true'
+            fontURL = 'https://github.com/googlefonts/roboto/blob/master/src/hinted/Roboto-Regular.ttf?raw=true'
 
         req = get(fontURL)
 
-        font = ImageFont.truetype(BytesIO(req.content),  size=eventCert.nameFontSize)
-        d.text(location, name, fill=eventCert.nameFontColor, font=font)
+        font = ImageFont.truetype(BytesIO(req.content),  size=eventCert.fontSize)
+
+        name = user.title + ' ' + user.name
+        d.text(
+            (eventCert.namePositionX, eventCert.namePositionY),
+            name,
+            fill=eventCert.fontColor,
+            font=font
+        )
+
+        if eventCert.includeAffiliationBody:
+            affiliationBody = user.affiliationBody.name if user.affiliationBody else ''
+            d.text(
+                (eventCert.affiliationPositionX, eventCert.affiliationPositionY),
+                affiliationBody,
+                fill=eventCert.fontColor,
+                font=font
+            )
+
+        if eventCert.includeEventName:
+            d.text(
+                (eventCert.eventNamePositionX, eventCert.eventNamePositionY),
+                eventCert.event.name,
+                fill=eventCert.fontColor,
+                font=font
+            )
 
         outputFile = BytesIO()
         im.save(outputFile, format='PDF')

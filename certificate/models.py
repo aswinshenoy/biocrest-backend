@@ -11,12 +11,20 @@ class EventCertificate(models.Model):
     event = models.ForeignKey(Event, on_delete=models.CASCADE)
     type = models.PositiveSmallIntegerField(choices=CERTIFICATE_TYPE_CHOICES, default=0)
 
+    fontURL = models.URLField(null=True, blank=True)
+    fontSize = models.PositiveSmallIntegerField(default=16)
+    fontColor = models.CharField(max_length=12, default='#000')
+
     namePositionX = models.PositiveSmallIntegerField(default=0)
     namePositionY = models.PositiveSmallIntegerField(default=0)
-    nameFontName = models.CharField(max_length=25, null=True, blank=True)
-    nameFontURL  = models.URLField(null=True, blank=True)
-    nameFontSize = models.PositiveSmallIntegerField(default=16)
-    nameFontColor = models.CharField(max_length=12, default='#000')
+
+    includeAffiliationBody = models.BooleanField(default=False)
+    affiliationPositionX = models.PositiveSmallIntegerField(default=0)
+    affiliationPositionY = models.PositiveSmallIntegerField(default=0)
+
+    includeEventName = models.BooleanField(default=False)
+    eventNamePositionX = models.PositiveSmallIntegerField(default=0)
+    eventNamePositionY = models.PositiveSmallIntegerField(default=0)
 
     isReleased = models.BooleanField(default=True)
     template = MediaField(
