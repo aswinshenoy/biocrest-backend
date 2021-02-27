@@ -6,7 +6,7 @@ phases:
     - aws --version
     - $(aws ecr get-login --no-include-email --region ap-south-1 | sed 's|https://||')
     - COMMIT_HASH=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c 1-7)
-    - REPOSITORY_URI=282472006225.dkr.ecr.ap-south-1.amazonaws.com/biocrest-backend
+    - REPOSITORY_URI=945559281781.dkr.ecr.ap-south-1.amazonaws.com/feztia
     - docker pull $REPOSITORY_URI:latest || true
   build:
     commands:

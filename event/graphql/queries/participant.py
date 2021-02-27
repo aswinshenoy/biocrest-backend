@@ -118,11 +118,11 @@ class ParticipantQueries(graphene.ObjectType):
                             Q(user__affiliationTitle__isnull=True) |
                             Q(user__affiliationBody__isnull=True) |
                             Q(user__country__isnull=True) |
-                            Q(user__type__isnull=True) |
-                            Q(
-                                Q(user__phone__isnull=True) &
-                                Q(user__country__exact='India')
-                            )
+                            Q(user__type__isnull=True)
+                            # Q(
+                            #     Q(user__phone__isnull=True) &
+                            #     Q(user__country__exact='India')
+                            # )
                             # Q(user__IDCard='') |
                             # Q(user__IDCard__exact=None)
                         )

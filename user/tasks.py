@@ -6,23 +6,24 @@ from huey.contrib.djhuey import task, db_task
 
 @task()
 def send_otp_to_number(code, number) -> None:
-    from django.conf import settings
-    from requests import post
-    SMS_API_URL = "http://alertbox.in/pushsms.php"
-    DOMAIN = 'https://amrita.edu/biocrest'
-
-    template = """<#> {otp} is the OTP for your Amrita Biocrest registration. @{domain} #{otp}"""
-    message = template.format(otp=code, domain=DOMAIN)
-    data = {
-        "username": settings.ALERTBOX_USERNAME,
-        "api_password": settings.ALERTBOX_PASSWORD,
-        "sender": settings.ALERTBOX_SENDER_ID,
-        "to": number,
-        "message": message,
-        "priority": 4
-    }
-    r = post(SMS_API_URL, data=data)
-    print(r.content)
+    # from django.conf import settings
+    # from requests import post
+    # SMS_API_URL = "http://alertbox.in/pushsms.php"
+    # DOMAIN = 'https://amrita.edu/biocrest'
+    #
+    # template = """<#> {otp} is the OTP for your Amrita Biocrest registration. @{domain} #{otp}"""
+    # message = template.format(otp=code, domain=DOMAIN)
+    # data = {
+    #     "username": settings.ALERTBOX_USERNAME,
+    #     "api_password": settings.ALERTBOX_PASSWORD,
+    #     "sender": settings.ALERTBOX_SENDER_ID,
+    #     "to": number,
+    #     "message": message,
+    #     "priority": 4
+    # }
+    # r = post(SMS_API_URL, data=data)
+    # print(r.content)
+    return None
 
 
 @db_task()
@@ -55,7 +56,7 @@ def send_email_confirmation_email(user, code, eventID=None) -> None:
     send_mail(
         subject=eventName + ': Verify Your Email',
         message=strip_tags(html_content),
-        from_email=emailHost+'@amritauniversity.info',
+        from_email=emailHost+'@mails.traboda.com',
         recipient_list=[user.email],
         html_message=html_content,
         fail_silently=False,
@@ -93,7 +94,7 @@ def send_password_reset_email(user, code, eventID=None) -> None:
     send_mail(
         subject=eventName + ': Reset Your Password',
         message=strip_tags(html_content),
-        from_email=emailHost+'@amritauniversity.info',
+        from_email=emailHost+'@mails.traboda.com',
         recipient_list=[user.email],
         html_message=html_content,
         fail_silently=False,

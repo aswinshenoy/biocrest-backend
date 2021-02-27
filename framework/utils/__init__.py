@@ -39,6 +39,7 @@ REG_STATUS_TYPE_CHOICES = (
 CERTIFICATE_TYPE_CHOICES = (
     (0, 'Participation'),
     (1, 'Merit/Prize'),
+    (2, 'Volunteer')
 )
 
 PARTICIPANT_PRIZE_CHOICES = (
