@@ -76,6 +76,23 @@ class Event(graphene.ObjectType):
     winners = graphene.List(
         'event.graphql.types.EventWinner'
     )
+    isRegistered = graphene.Boolean()
+    isApprovedParticipant = graphene.Boolean()
+
+    def resolve_isApprovedParticipant(self, info):
+        from event.models import Participant
+        if info.context.userID:
+            return Participant.objects.filter(
+                user_id=info.context.userID,
+                approver__isnull=False
+            ).exists()
+
+    def resolve_isRegistered(self, info):
+        from event.models import Participant
+        if info.context.userID:
+            return Participant.objects.filter(
+                user_id=info.context.userID
+            ).exists()
 
     def resolve_hasWinners(self, info):
         from event.models import Participant
