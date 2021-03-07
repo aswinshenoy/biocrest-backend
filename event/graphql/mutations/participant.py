@@ -5,8 +5,9 @@ from chowkidar.graphql.decorators import login_required
 from chowkidar.graphql.exceptions import APIException
 from chowkidar.graphql.scalars import Upload
 from django.db.models import Q
+from django.utils import timezone
 
-from event.models import Participant, Submission
+from event.models import Participant, Submission, Event
 from user.models import Team
 from ..types import Participant as PT
 
@@ -66,16 +67,40 @@ class Participate(
         except Participant.DoesNotExist:
             if postApprovalData is not None:
                 raise APIException('Participant Not Approved to submit post approval form', code='FORBIDDEN')
+            try:
+                event = Event.objects.get(id=eventID)
+                approver = None
+                approverTimestamp = None
+                if not event.acceptRegistrations or timezone.now() > event.registrationCloseTimestamp:
+                    raise APIException('Registration closed', code='REG_CLOSED')
+                if event.slotLimits and Participant.objects.filter(event=event, approver__isnull=False).count() > event.slotLimits:
+                    raise APIException('Registration closed', code='REG_CLOSED')
+                if not event.requireApproval:
+                    if event.parent:
+                        participant = Participant.objects.filter(
+                            event_id=event.parent.id,
+                            approver__isnull=False
+                        )
+                        if participant.exists():
+                            participant = participant.first()
+                            approver = participant.approver
+                            approverTimestamp = participant.timestampApproved
+            except Event.DoesNotExist:
+                raise APIException('Event Does not exist', code='INVALID_EVENT_ID')
             if teamID is not None:
                 return Participant.objects.create(
                     event_id=eventID,
                     formData=formData,
-                    team_id=teamID
+                    team_id=teamID,
+                    approver=approver,
+                    timestampApproved=approverTimestamp
                 )
             return Participant.objects.create(
                 event_id=eventID,
                 formData=formData,
-                user_id=info.context.userID
+                user_id=info.context.userID,
+                approver=approver,
+                timestampApproved=approverTimestamp
             )
 
 
