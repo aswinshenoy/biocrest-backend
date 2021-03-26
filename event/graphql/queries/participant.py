@@ -149,7 +149,7 @@ class ParticipantQueries(graphene.ObjectType):
                 Q(user__email__exact=search)
             )
         qs = qs.prefetch_related('user')
-        paginator = CursorPaginator(qs, ordering=('timestampRegistered',))
+        paginator = CursorPaginator(qs, ordering=('-timestampRegistered',))
         page = paginator.page(first=count, after=after)
         return ParticipantsQuery(
             participants=page,
