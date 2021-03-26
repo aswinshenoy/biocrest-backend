@@ -41,7 +41,8 @@ class RegisterUser(
             user = User.objects.create(
                 name=input.name,
                 email=input.email,
-                username=generate_username_from_email(input.email)
+                username=generate_username_from_email(input.email),
+                UTMSource=input.UTMSource
             )
             user.set_password(input.password)
             user.save()
@@ -103,6 +104,8 @@ class UpdateProfile(
                 pass
         if hasattr(update, "idCard") and update.idCard is not None:
             user.IDCard = update.idCard
+        if hasattr(update, "UTMSource") and update.UTMSource is not None:
+            user.UTMSource = update.UTMSource
         user.save()
         return AccountMutationResponse(success=True, returning=user)
 

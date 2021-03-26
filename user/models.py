@@ -46,6 +46,8 @@ class User(AbstractUser):
     isPhoneVerified = models.BooleanField(default=False)
     type = models.PositiveSmallIntegerField(choices=USER_TYPE_CHOICES, blank=True, null=True)
 
+    UTMSource = models.CharField(max_length=255, default='', blank=True)
+
     IDCard = MediaField(
         storage=UserIDStorage(),
         max_size=1024 * 1024 * 8,

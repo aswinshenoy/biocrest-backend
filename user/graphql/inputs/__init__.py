@@ -7,6 +7,7 @@ class UserCreationInput(graphene.InputObjectType):
     email = graphene.String(required=True)
     password = graphene.String(required=True)
     eventID = graphene.ID()
+    UTMSource = graphene.String()
 
 
 class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
@@ -23,6 +24,7 @@ class UserUpdationInput(UserCreationInput, graphene.InputObjectType):
     gender = graphene.String()
     affiliationBodyID = graphene.ID()
     affiliationTitleID = graphene.ID()
+    UTMSource = graphene.String()
 
 
 class ProfileQueryFilters(graphene.InputObjectType):

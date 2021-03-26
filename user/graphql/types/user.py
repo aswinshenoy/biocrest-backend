@@ -28,6 +28,7 @@ class UserProfile(graphene.ObjectType):
     isIDVerified = graphene.Boolean()
     isProfileComplete = graphene.Boolean()
     registrations = graphene.List('event.graphql.types.Participant')
+    UTMSource = graphene.String()
 
     def resolve_dateJoined(self, info):
         to_tz = timezone.get_default_timezone()
